@@ -1,0 +1,18 @@
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date
+from sqlalchemy.orm import relationship
+
+from grand_cedre.models import Base
+from grand_cedre.models.client import Client
+
+
+class Contract(Base):
+    __tablename__ = "contracts"
+
+    id = Column(Integer, primary_key=True)
+    client_id = Column(Integer, ForeignKey("clients.id"))
+    start_date = Column(Date)
+    end_date = Column(Date)
+    booking_duration = Column(Float)
+    hourly_rate = Column(String)
+
+    client = relationship("Client", back_populates="contracts")
