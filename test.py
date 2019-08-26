@@ -46,6 +46,9 @@ def main():
         total_owed = sum([booking.price for booking in bookings])
         logger.info(f"{user} owes a total of {total_owed} ")
 
+    session.commit()
+    session.close()
+
 
 if __name__ == "__main__":
     main()

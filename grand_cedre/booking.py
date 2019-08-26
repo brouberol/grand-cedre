@@ -7,6 +7,8 @@ from grand_cedre.service import get_service
 from grand_cedre.pricing import Duration, booking_price, NoMatchingPrice
 from grand_cedre.models.contract import Contract
 from grand_cedre.models.client import Client
+from grand_cedre.models.booking import Booking
+from grand_cedre.models.room import Room
 
 
 class RoomBooking:
@@ -88,6 +90,26 @@ class RoomBooking:
             else:
                 raise exc
 
+    def to_model(self, session, calendar_id):
+        room = session.query(Room).filter_by(calendar_id=calendar_id).one()
+        booking = session.query(Booking).filter_by(calendar_link=self.link).first()
+        if not booking:
+            logging.info(f"Inserting new booking for {self}")
+            booking = Booking(
+                room=room,
+                client=self._creator,
+                start_datetime=self.start,
+                end_datetime=self.end,
+                calendar_link=self.link,
+                price=str(self.price),
+            )
+        else:
+            logging.info(f"Updating booking {self}")
+            booking.start_datetime = self.start
+            booking.end_datetime = self.end
+            booking.price = str(self.price)
+        return booking
+
 
 def start_of_current_month():
     now = datetime.datetime.utcnow()
@@ -121,5 +143,6 @@ def list_monthly_bookings(calendar, session):
     for event in resp.get("items", []):
         booking = RoomBooking.from_event(event, calendar["metadata"]["individual"])
         booking.resolve(session)
+        session.add(booking.to_model(session, calendar["id"]))
         out.append(booking)
     return out
