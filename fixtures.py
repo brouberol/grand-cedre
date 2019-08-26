@@ -5,6 +5,8 @@ from datetime import date
 from grand_cedre.models import Base
 from grand_cedre.models.client import Client
 from grand_cedre.models.contract import Contract
+from grand_cedre.models.room import Room
+from grand_cedre.models.booking import Booking
 
 engine = create_engine("sqlite:///data/data.db")
 Base.metadata.create_all(engine)
