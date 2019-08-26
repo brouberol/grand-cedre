@@ -31,7 +31,7 @@ def main():
 
     session = Session()
     for calendar in calendars:
-        logger.info(f"Fectching monthly bookings for calendar {calendar['summary']}")
+        logger.info(f"Fetching monthly bookings for calendar {calendar['summary']}")
         bookings = list_monthly_bookings(calendar, session=session)
 
         for booking in bookings:
