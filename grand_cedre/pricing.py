@@ -6,6 +6,10 @@ class NoMatchingPrice(Exception):
     pass
 
 
+# Todo: move this in DB?
+# Support changing price
+
+
 class Duration(Enum):
     ONE_HOUR = 1
     ONE_HOUR_AND_HALF = 1.5
