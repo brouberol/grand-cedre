@@ -10,11 +10,12 @@ from grand_cedre.models.client import Client
 
 
 class RoomBooking:
-    def __init__(self, start, end, creator_email, title, individual):
+    def __init__(self, start, end, creator_email, title, link, individual):
         self.start = start
         self.end = end
         self.creator_email = creator_email
         self.title = title
+        self.link = link
         self.individual = individual
         self._price = None
         self._creator = None
@@ -57,6 +58,7 @@ class RoomBooking:
             ),
             creator_email=event["creator"]["email"],
             title=event["summary"],
+            link=event["htmlLink"],
             individual=individual,
         )
 
