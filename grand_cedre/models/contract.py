@@ -16,3 +16,12 @@ class Contract(Base):
     hourly_rate = Column(String)
 
     client = relationship("Client", back_populates="contracts")
+
+    def __str__(self):
+        return (
+            f"{str(self.client)}: {self.start_date}->{self.end_date}:"
+            f" {self.booking_duration}h"
+        )
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}: {str(self)}>"

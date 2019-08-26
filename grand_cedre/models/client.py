@@ -15,3 +15,9 @@ class Client(Base):
     is_owner = Column(Boolean, default=False)
 
     contracts = relationship("Contract", back_populates="client")
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}: {str(self)}: {self.email}>"
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
