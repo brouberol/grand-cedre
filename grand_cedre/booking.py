@@ -3,7 +3,7 @@ import logging
 
 from decimal import Decimal
 
-from grand_cedre.utils import start_of_current_month, end_of_current_month
+from grand_cedre.utils import start_of_month, end_of_month
 from grand_cedre.service import get_service
 from grand_cedre.pricing import Duration, booking_price, NoMatchingPrice
 from grand_cedre.models.contract import Contract
@@ -112,17 +112,18 @@ class RoomBooking:
         return booking
 
 
-def list_monthly_bookings(calendar, session):
+def list_monthly_bookings(calendar, session, start=None, end=None):
     out = []
     service = get_service()
-    start_of_month = start_of_current_month().isoformat() + "Z"
-    end_of_month = end_of_current_month().isoformat() + "Z"
+    start = (start or start_of_month()).isoformat() + "Z"
+    end = (end or end_of_month()).isoformat() + "Z"
+    logging.info(f"Fetching events from {start} to {end}")
     resp = (
         service.events()
         .list(
             calendarId=calendar["id"],
-            timeMin=start_of_month,
-            timeMax=end_of_month,
+            timeMin=start,
+            timeMax=end,
             singleEvents=True,
             orderBy="startTime",
         )
