@@ -3,7 +3,7 @@ Babel==2.7.0
 cachetools==3.1.1
 certifi==2019.6.16
 chardet==3.0.4
--r requirements.txt
+-r requirements-weasyprint.txt
 Click==7.0
 Flask==1.1.1
 Flask-Admin==1.5.3
