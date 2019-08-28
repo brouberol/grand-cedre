@@ -4,6 +4,7 @@ from sqlalchemy.schema import UniqueConstraint
 
 
 from grand_cedre.models import Base
+from grand_cedre.pricing import Duration
 
 
 class Booking(Base):
@@ -37,3 +38,11 @@ class Booking(Base):
 
     def __repr__(self):
         return f"<{self.__class__.__name__}: {(str(self))}: price:{self.price}>"
+
+    @property
+    def duration_in_hour(self):
+        return (self.end_datetime - self.start_datetime).seconds / 3600.0
+
+    @property
+    def duration(self):
+        return Duration.from_hour(self.duration_in_hour)

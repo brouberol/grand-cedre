@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang='fr'>
+  <head>
+    <meta charset="utf-8">
+
+    <link href="../static/invoice.css" rel="stylesheet" />
+    <title>Grand Cèdre - Facture {{ invoice.client.full_name }} - {{ locale_issue_date }}</title>
+    <meta name="description" content="Facture Grand Cèdre {{ locale_issue_date }}">
+    <meta name="author" content="Clémentine Barthélémy">
+  </head>
+
+  <body>
+    <aside>
+      <img src="../static/logo-small.jpg" />
+      <address id="from">
+        Le Grand Cèdre
+        Clémentine Barthélemy
+        20 rue Carnot
+        71100 Chalon sur Saône
+
+      <div id="siret">
+        Siret 42171292800033 APE 9604Z
+        Dispensé d'immatriculation au registre du commerce
+        et des sociétés RCS et au répertoire des métiers RM
+      </div>
+      </address>
+
+      <address id="to">
+        {{ invoice.client.full_name }}
+        Diététicienne-Sophrologue
+        6 bis rue GUILLOT
+        71100 CHALON-SUR-SAÔNE
+      </address>
+    </aside>
+
+    <div id="invoice_date">
+      Chalon sur Saône, le {{ locale_issue_date }}
+    </div>
+
+    <h1 id="invoice_number">
+      FACTURE N°{{ invoice.number }}
+    </h1>
+
+    <div id="service">
+      <div id="service_summary">
+        Mise à disposition de locaux équipés pour le mois {% if locale_month.startswith('a') %}d'{% else %}de {% endif %}{{ locale_month }} {{ locale_year }}
+      </div>
+
+      <div id="service_details">
+        <table>
+        {% for room, room_bookings_per_duration in invoice.bookings_per_room.items() %}
+        {% for duration, room_bookings in room_bookings_per_duration.items() %}
+          <tr>
+            <td class="service_description">
+              {{ room.name }}: {{ room_bookings.duration_in_hours | replace(".0", "") }} heure{% if room_bookings.duration_in_hours > 1 %}s{% endif %}
+            </td>
+            <td class="service_price">
+              {{ room_bookings.count }} x {{ duration }}  = {{ room_bookings.price }} {{ invoice.symbol }}
+            </td>
+          </tr>
+        {% endfor %}
+        {% endfor %}
+          <tr id="invoice_total">
+            <td>
+              TOTAL
+            </td>
+            <td id="invoice_price">
+              {{ invoice.total_price }} {{ invoice.symbol }} TTC
+            </td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+
+    <div id="vat_mention">
+      TVA non applicable, art.993 B du CGI
+    </div>
+
+    <footer>
+      <div id="footer_address">Clémentine Barthélemy- le Grand Cèdre – 20 rue Carnot - 71100 Chalon-sur-Saône</div>
+      <div id="footer_siret">Siret 42171292800033 APE 9604Z</div>
+    </footer>
+  </body>
+</html>

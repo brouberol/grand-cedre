@@ -56,3 +56,62 @@ class Invoice(Base):
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {str(self)}>"
+
+    @staticmethod
+    def format_period():
+        today = datetime.date.today()
+        return f"{today.year}-{str(today.month).zfill(2)}"
+
+    @property
+    def symbol(self):
+        return SYMBOLS[self.currency]
+
+    @property
+    def total_price(self):
+        return sum([Decimal(booking.price) for booking in self.bookings])
+
+    @property
+    def number(self):
+        shortened_year = self.period.split("-")[0][2:]
+        return f"GC {str(self.id).zfill(3)}-{shortened_year}"
+
+    @property
+    def bookings_per_room(self):
+        out = defaultdict(dict)
+        for booking in self.bookings:
+            if booking.duration not in out[booking.room]:
+                out[booking.room][booking.duration] = RoomBookings([booking])
+            else:
+                out[booking.room][booking.duration].bookings.append(booking)
+        return out
+
+    @property
+    def year(self):
+        return int(self.period.split("-")[0])
+
+    @property
+    def month(self):
+        return int(self.period.split("-")[0])
+
+    @property
+    def filename(self):
+        return f"{str(self.client).lower()}-{self.issued_at}.html"
+
+    def export_to_template(self, locale="fr_FR"):
+        today = datetime.date.today()
+        template_variables = {}
+        template_variables["invoice"] = self
+        template_variables["locale_month"] = format_date(today, "MMMM", locale=locale)
+        template_variables["locale_year"] = today.year
+        template_variables["locale_issue_date"] = format_date(
+            self.issued_at, "dd MMMM YYYY", locale=locale
+        )
+        with open(
+            os.path.join(current_dir, "..", "templates", "invoice.html.j2")
+        ) as template_f:
+            template = Template(template_f.read())
+            invoice_content = template.render(**template_variables)
+        invoice_filename = os.path.join(current_dir, "..", "output", self.filename)
+        with open(invoice_filename, "w") as out:
+            out.write(invoice_content)
+        HTML(invoice_filename).write_pdf(invoice_filename.replace(".html", ".pdf"))

@@ -21,6 +21,17 @@ class Duration(Enum):
     # WEEKEND = 16
     # PREPAID = 40
 
+    def __str__(self):
+        translations = {
+            "ONE_HOUR": "1h",
+            "ONE_HOUR_AND_HALF": "1.5h",
+            "TWO_HOURS": "2h",
+            "THREE_HOURS": "3h",
+            "HALF_DAY": "demi-journée",
+            "WHOLE_DAY": "journée entière",
+        }
+        return translations[self._name_]
+
     @classmethod
     def from_hour(cls, nb_hour):
         return cls._value2member_map_[nb_hour]
