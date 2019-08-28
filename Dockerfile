@@ -19,7 +19,8 @@ RUN apt-get update && \
     pip install -r requirements-weasyprint.txt gunicorn && \
     apt-get remove -y build-essential && \
     apt-get clean && \
-    rm /var/lib/apt/lists
-COPY . .
+    rm -r /var/lib/apt/lists
+COPY ./requirements.txt .
 RUN pip install -r requirements.txt
+COPY . .
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
