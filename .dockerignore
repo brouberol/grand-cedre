@@ -1,1 +1,6 @@
 data
+.git*
+Dockerfile
+Makefile
+**/__pycache__
+**/*.pyc
