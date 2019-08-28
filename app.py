@@ -8,6 +8,7 @@ from grand_cedre.models.client import Client
 from grand_cedre.models.contract import Contract
 from grand_cedre.models.room import Room
 from grand_cedre.models.booking import Booking
+from grand_cedre.models.invoice import Invoice
 
 
 app = Flask("grand-cedre")
@@ -35,7 +36,16 @@ class BookingView(ModelView):
     }
 
 
+class InvoiceView(ModelView):
+    column_list = ("client", Invoice.period, "total_price", Invoice.issued_at)
+    column_formatters = {
+        "client": (lambda v, c, m, p: f"{m.client}"),
+        "total_price": (lambda v, c, m, p: f"{m.total_price}{m.symbol}"),
+    }
+
+
 admin.add_view(ModelView(Client, db.session))
 admin.add_view(ModelView(Contract, db.session))
 admin.add_view(BookingView(Booking, db.session))
 admin.add_view(ModelView(Room, db.session))
+admin.add_view(InvoiceView(Invoice, db.session))

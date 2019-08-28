@@ -7,6 +7,7 @@ from grand_cedre.models.client import Client
 from grand_cedre.models.contract import Contract
 from grand_cedre.models.room import Room
 from grand_cedre.models.booking import Booking
+from grand_cedre.models.invoice import Invoice
 
 engine = create_engine("sqlite:///data/data.db")
 Base.metadata.create_all(engine)
