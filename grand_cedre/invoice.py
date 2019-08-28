@@ -16,6 +16,11 @@ def generate_invoice_per_user(session, start=None, end=None):
                 "Skipping invoice generation for {client} as (s)he's the owner"
             )
             continue
+        elif client.missing_details():
+            logging.warning(
+                f"Skipping invoice generation for client {client} as it's missing details"
+            )
+            continue
         logging.info(f"Generating invoice for {client} for period {start}->{end}")
         bookings = (
             session.query(Booking)

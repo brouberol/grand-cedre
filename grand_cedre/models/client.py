@@ -33,3 +33,8 @@ class Client(Base):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+    def missing_details(self):
+        return not all(
+            (self.first_name, self.last_name, self.address, self.zip_code, self.city)
+        )
