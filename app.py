@@ -56,6 +56,7 @@ admin = Admin(
 
 
 class ClientView(ModelView):
+    can_delete = False
     column_exclude_list = ["is_owner"]
     column_searchable_list = ("first_name", "last_name")
     form_excluded_columns = ("contracts", "bookings", "invoices")
@@ -122,6 +123,7 @@ class InvoiceView(ModelView):
             )
         return ""
 
+    can_delete = False
     column_searchable_list = ("client.first_name", "client.last_name")
     column_list = (
         "number",
