@@ -1,14 +1,15 @@
 import datetime
 import logging
 
-from grand_cedre.utils import start_of_current_month, end_of_current_month
+from grand_cedre.utils import start_of_month, end_of_month
 from grand_cedre.models.client import Client
 from grand_cedre.models.booking import Booking
 from grand_cedre.models.invoice import Invoice
 
 
-def generate_invoice_per_user(session):
-    start, end = start_of_current_month(), end_of_current_month()
+def generate_invoice_per_user(session, start=None, end=None):
+    start = start or start_of_month()
+    end = end or end_of_month()
     for client in session.query(Client):
         if client.is_owner:
             logging.info(

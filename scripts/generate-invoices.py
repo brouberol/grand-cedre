@@ -6,6 +6,7 @@ parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
 sys.path.insert(0, parent_dir)
 
 import logging
+import argparse
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -15,6 +16,13 @@ from grand_cedre.invoice import generate_invoice_per_user
 
 engine = create_engine(os.environ["SQLALCHEMY_DATABASE_URI"])
 Session = sessionmaker(bind=engine)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--year", type=int)
+    parser.add_argument("--month", type=int)
+    return parser.parse_args()
 
 
 def setup_logging():
@@ -29,9 +37,15 @@ def setup_logging():
 
 
 def main():
+    args = parse_args()
     setup_logging()
     session = Session()
-    generate_invoice_per_user(session)
+    if args.year and args.month:
+        start = start_of_month(args.year, args.month)
+        end = end_of_month(args.year, args.month)
+        generate_invoice_per_user(session, start, end)
+    else:
+        generate_invoice_per_user(session)
     session.commit()
     session.close()
 
