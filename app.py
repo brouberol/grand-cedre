@@ -2,7 +2,7 @@ import tempfile
 import os
 
 from weasyprint import HTML
-from flask import Flask, abort, make_response
+from flask import Flask, abort, make_response, url_for
 from flask_admin import Admin
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin.contrib.sqla import ModelView
@@ -89,16 +89,28 @@ class BookingView(ModelView):
 
 class InvoiceView(ModelView):
     column_searchable_list = ("client.first_name", "client.last_name")
-    column_list = ("client", Invoice.period, "total_price", Invoice.issued_at)
+    column_list = (
+        "client",
+        Invoice.period,
+        "total_price",
+        Invoice.issued_at,
+        "download",
+    )
     column_labels = {
         "client": "Client",
         "period": "Période",
         "total_price": "Total",
         "issued_at": "Date d'édition",
+        "download": "Télécharger",
     }
     column_formatters = {
         "client": (lambda v, c, m, p: f"{m.client}"),
         "total_price": (lambda v, c, m, p: f"{m.total_price}{m.symbol}"),
+        "download": (
+            lambda v, c, m, p: Markup(
+                f"<a href={url_for('download_invoice_as_pdf', invoice_id=m.id)}>💾</a>"
+            )
+        ),
     }
 
 
