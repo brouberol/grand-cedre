@@ -6,6 +6,7 @@ from flask import Flask, abort, make_response, url_for, redirect
 from flask_admin import Admin, AdminIndexView, expose
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin.contrib.sqla import ModelView
+from flask_babelex import Babel
 from markupsafe import Markup
 from sqlalchemy import or_
 
@@ -23,6 +24,12 @@ template_dir = os.path.join(current_dir, "grand_cedre", "templates")
 app = Flask("grand-cedre", template_folder=template_dir)
 app.config.from_object(Config.from_env())
 db = SQLAlchemy(app)
+babel = Babel(app)
+
+
+@babel.localeselector
+def get_locale():
+    return "fr"
 
 
 class HomeAdminView(AdminIndexView):
