@@ -2,7 +2,7 @@ import tempfile
 import os
 
 from weasyprint import HTML
-from flask import Flask, abort, make_response, url_for
+from flask import Flask, abort, make_response, url_for, redirect
 from flask_admin import Admin, AdminIndexView, expose
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin.contrib.sqla import ModelView
@@ -157,6 +157,11 @@ admin.add_view(ClientView(Client, db.session, "Clients"))
 admin.add_view(ContractView(Contract, db.session, "Contrats"))
 admin.add_view(BookingView(Booking, db.session, "Réservations"))
 admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
+
+
+@app.route("/")
+def app_index():
+    return redirect("/admin")
 
 
 @app.route("/invoice/<int:invoice_id>/pdf")
