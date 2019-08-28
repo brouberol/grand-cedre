@@ -96,8 +96,16 @@ class BookingView(ModelView):
         "price": "Prix",
         "frozen": "Consolidée",
     }
-    column_list = column_labels.keys()
-
+    column_list = [
+        "client",
+        "room",
+        "start_date",
+        "start_time",
+        "end_time",
+        "calendar_link",
+        "price",
+    ]
+    column_filters = ["start_datetime", "end_datetime", "price"]
     column_searchable_list = (
         "client.first_name",
         "client.last_name",
@@ -107,7 +115,7 @@ class BookingView(ModelView):
     column_formatters = {
         "calendar_link": (
             lambda v, c, m, p: Markup(
-                f'<a href={m.calendar_link} target="_blank">lien</a>'
+                f'<a href={m.calendar_link} target="_blank">📅</a>'
             )
         ),
         "start_date": lambda v, c, m, p: (f"{m.start_datetime.date()}"),
@@ -139,6 +147,7 @@ class InvoiceView(ModelView):
         "download",
     )
     column_labels = {
+        "number": "# Facture",
         "client": "Client",
         "period": "Période",
         "total_price": "Total",
