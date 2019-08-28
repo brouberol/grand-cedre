@@ -66,7 +66,11 @@ class RoomBooking:
         )
 
     def resolve(self, session):
-        self._creator = session.query(Client).filter_by(email=self.creator_email).one()
+        creator = session.query(Client).filter_by(email=self.creator_email).first()
+        if not creator:
+            creator = Client(email=self.creator_email)
+            session.add(creator)
+        self._creator = creator
 
         try:
             self._price = booking_price(self.duration_class, self.individual)
