@@ -7,23 +7,20 @@ from flask_admin import Admin
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin.contrib.sqla import ModelView
 from markupsafe import Markup
+from urllib.parse import quote
 
 from grand_cedre.models.client import Client
 from grand_cedre.models.contract import Contract
 from grand_cedre.models.room import Room
 from grand_cedre.models.booking import Booking
 from grand_cedre.models.invoice import Invoice
+from grand_cedre.config import Config
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 output_dir = os.path.join(current_dir, "grand_cedre", "output")
 
 app = Flask("grand-cedre")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data/data.db"
-app.config["FLASK_ADMIN_SWATCH"] = "flatly"
-app.config[
-    "SECRET_KEY"
-] = b"\ry\xe0\x97\xe88\xed\x84\x05\xfdfN\x1daQ\xf8\x83!\xeanp\x80R\xd1"
-
+app.config.from_object(Config.from_env())
 db = SQLAlchemy(app)
 admin = Admin(app, name="grand-cedre", template_mode="bootstrap3")
 
