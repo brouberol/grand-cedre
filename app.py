@@ -20,8 +20,9 @@ from grand_cedre.config import Config
 current_dir = os.path.abspath(os.path.dirname(__file__))
 output_dir = os.path.join(current_dir, "grand_cedre", "output")
 template_dir = os.path.join(current_dir, "grand_cedre", "templates")
+static_dir = os.path.join(current_dir, "grand_cedre", "static")
 
-app = Flask("grand-cedre", template_folder=template_dir)
+app = Flask("grand-cedre", template_folder=template_dir, static_folder=static_dir)
 app.config.from_object(Config.from_env())
 db = SQLAlchemy(app)
 babel = Babel(app)
