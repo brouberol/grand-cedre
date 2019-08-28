@@ -127,6 +127,13 @@ class BookingView(ModelView):
         ),
     }
 
+    def get_query(self):
+        return (
+            self.session.query(self.model)
+            .join(Client)
+            .filter(Client.is_owner.is_(False))
+        )
+
 
 class InvoiceView(ModelView):
     def render_download_link(view, context, model, p):
