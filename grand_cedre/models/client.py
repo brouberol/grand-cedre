@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import relationship
+from sqlalchemy.schema import UniqueConstraint
+
 
 from grand_cedre.models import Base
 
@@ -7,6 +9,7 @@ from grand_cedre.models import Base
 class Client(Base):
 
     __tablename__ = "clients"
+    __table_args__ = (UniqueConstraint("first_name", "last_name", "email"),)
 
     id = Column(Integer, primary_key=True)
     first_name = Column(String)

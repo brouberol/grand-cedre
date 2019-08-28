@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date
 from sqlalchemy.orm import relationship
+from sqlalchemy.schema import UniqueConstraint
 
 from grand_cedre.models import Base
 from grand_cedre.models.client import Client
@@ -7,6 +8,9 @@ from grand_cedre.models.client import Client
 
 class Contract(Base):
     __tablename__ = "contracts"
+    __table_args__ = (
+        UniqueConstraint("client_id", "start_date", "end_date", "booking_duration"),
+    )
 
     id = Column(Integer, primary_key=True)
     client_id = Column(Integer, ForeignKey("clients.id"))

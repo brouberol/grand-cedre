@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.schema import UniqueConstraint
+
 
 from grand_cedre.models import Base
 
@@ -7,6 +9,7 @@ from grand_cedre.models import Base
 class Booking(Base):
 
     __tablename__ = "bookings"
+    __table_args__ = (UniqueConstraint("room_id", "start_datetime", "end_datetime"),)
 
     id = Column(Integer, primary_key=True)
     room_id = Column(Integer, ForeignKey("rooms.id"))
