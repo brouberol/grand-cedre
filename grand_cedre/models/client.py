@@ -28,6 +28,8 @@ class Client(Base):
         return f"<{self.__class__.__name__}: {str(self)}: {self.email}>"
 
     def __str__(self):
+        if self.missing_details:
+            return self.email
         return f"{self.first_name} {self.last_name}"
 
     @property
