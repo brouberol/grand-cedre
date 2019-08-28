@@ -46,5 +46,3 @@ def generate_invoice_per_user(session):
                 )
             else:
                 logging.info(f"Invoice {invoice} already was generated")
-            invoice.export_to_template()
-            break
