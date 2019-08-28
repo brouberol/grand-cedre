@@ -14,6 +14,9 @@ class Client(Base):
     id = Column(Integer, primary_key=True)
     first_name = Column(String)
     last_name = Column(String)
+    address = Column(String)
+    zip_code = Column(String)
+    city = Column(String)
     email = Column(String, unique=True)
     is_owner = Column(Boolean, default=False)
 

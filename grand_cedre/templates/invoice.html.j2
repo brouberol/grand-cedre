@@ -27,9 +27,8 @@
 
       <address id="to">
         {{ invoice.client.full_name }}
-        Diététicienne-Sophrologue
-        6 bis rue GUILLOT
-        71100 CHALON-SUR-SAÔNE
+        {{ invoice.client.address }}
+        {{ invoice.client.zip_code }} {{ invoice.client.city }}
       </address>
     </aside>
 
