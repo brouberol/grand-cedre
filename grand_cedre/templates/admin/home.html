@@ -1,0 +1,12 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+  {% if warning_messages %}
+  <ul>
+  {% for warning in warning_messages %}
+    <li>{{ warning}}</li>
+  {% endfor %}
+  </ul>
+  {% else %}
+    ALL GOOD
+  {% endif %}
+{% endblock %}

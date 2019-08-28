@@ -3,11 +3,11 @@ import os
 
 from weasyprint import HTML
 from flask import Flask, abort, make_response, url_for
-from flask_admin import Admin
+from flask_admin import Admin, AdminIndexView, expose
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin.contrib.sqla import ModelView
 from markupsafe import Markup
-from urllib.parse import quote
+from sqlalchemy import or_
 
 from grand_cedre.models.client import Client
 from grand_cedre.models.contract import Contract
@@ -18,11 +18,41 @@ from grand_cedre.config import Config
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 output_dir = os.path.join(current_dir, "grand_cedre", "output")
+template_dir = os.path.join(current_dir, "grand_cedre", "templates")
 
-app = Flask("grand-cedre")
+app = Flask("grand-cedre", template_folder=template_dir)
 app.config.from_object(Config.from_env())
 db = SQLAlchemy(app)
-admin = Admin(app, name="grand-cedre", template_mode="bootstrap3")
+
+
+class HomeAdminView(AdminIndexView):
+    @expose("/")
+    def admin_home(self):
+        warning_messages = []
+        clients_with_missing_details = (
+            db.session.query(Client)
+            .filter(
+                or_(
+                    Client.first_name.is_(None),
+                    Client.last_name.is_(None),
+                    Client.address.is_(None),
+                )
+            )
+            .all()
+        )
+        if clients_with_missing_details:
+            warning_messages.append(
+                (
+                    "Certains clients n'ont pas de nom ou d'adresse renseignés, "
+                    "ce qui bloquera la génération de facture"
+                )
+            )
+        return self.render("admin/home.html", warning_messages=warning_messages)
+
+
+admin = Admin(
+    app, name="grand-cedre", template_mode="bootstrap3", index_view=HomeAdminView()
+)
 
 
 class ClientView(ModelView):
