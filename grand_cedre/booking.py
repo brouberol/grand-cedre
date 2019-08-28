@@ -1,8 +1,9 @@
 import datetime
-import calendar
 import logging
 
 from decimal import Decimal
+
+from grand_cedre.utils import start_of_current_month, end_of_current_month
 from grand_cedre.service import get_service
 from grand_cedre.pricing import Duration, booking_price, NoMatchingPrice
 from grand_cedre.models.contract import Contract
@@ -109,19 +110,6 @@ class RoomBooking:
             booking.end_datetime = self.end
             booking.price = str(self.price)
         return booking
-
-
-def start_of_current_month():
-    now = datetime.datetime.utcnow()
-    monthstart = now.replace(day=1, hour=0, minute=0, second=0)
-    return monthstart
-
-
-def end_of_current_month():
-    now = datetime.datetime.utcnow()
-    _, last_day = calendar.monthrange(now.year, now.month)
-    monthend = now.replace(day=last_day, hour=0, minute=0, second=0)
-    return monthend
 
 
 def list_monthly_bookings(calendar, session):
