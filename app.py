@@ -67,6 +67,7 @@ class ClientView(ModelView):
         "zip_code": "Code postal",
         "city": "Ville",
     }
+    form_excluded_columns = ["is_owner", "contracts", "bookings", "invoices"]
 
 
 class ContractView(ModelView):
@@ -86,6 +87,8 @@ class BookingView(ModelView):
         "client": "Client",
         "room": "Salle",
         "invoice": "Facture",
+        "start_datetime": "Date de début",
+        "end_datetime": "Date de fin",
         "start_date": "Date",
         "start_time": "Heure de début",
         "end_time": "Heure de fin",
@@ -141,6 +144,7 @@ class InvoiceView(ModelView):
         "total_price": "Total",
         "issued_at": "Date d'édition",
         "download": "Télécharger",
+        "currency": "Devise",
     }
     column_formatters = {
         "client": (lambda v, c, m, p: f"{m.client}"),
