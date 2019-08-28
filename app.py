@@ -60,6 +60,7 @@ class ClientView(ModelView):
     column_exclude_list = ["is_owner"]
     column_searchable_list = ("first_name", "last_name")
     form_excluded_columns = ("contracts", "bookings", "invoices")
+    column_filters = ["first_name", "last_name", "address", "city", "zip_code"]
     column_labels = {
         "first_name": "Prénom",
         "last_name": "Nom",
