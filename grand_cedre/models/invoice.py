@@ -1,7 +1,6 @@
 import datetime
 import os
 
-from weasyprint import HTML
 from jinja2 import Template
 from babel.dates import format_date
 from decimal import Decimal
@@ -95,9 +94,9 @@ class Invoice(Base):
 
     @property
     def filename(self):
-        return f"{str(self.client).lower()}-{self.issued_at}.html"
+        return f"{str(self.client).lower()}-{self.issued_at}.pdf".replace(" ", "-")
 
-    def export_to_template(self, locale="fr_FR"):
+    def to_html(self, locale="fr_FR"):
         today = datetime.date.today()
         template_variables = {}
         template_variables["invoice"] = self
@@ -111,7 +110,4 @@ class Invoice(Base):
         ) as template_f:
             template = Template(template_f.read())
             invoice_content = template.render(**template_variables)
-        invoice_filename = os.path.join(current_dir, "..", "output", self.filename)
-        with open(invoice_filename, "w") as out:
-            out.write(invoice_content)
-        HTML(invoice_filename).write_pdf(invoice_filename.replace(".html", ".pdf"))
+        return invoice_content
