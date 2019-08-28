@@ -62,7 +62,12 @@ admin = Admin(
 )
 
 
-class ClientView(ModelView):
+class GrandCedreView(ModelView):
+    def search_placeholder(self):
+        return "Recherche"
+
+
+class ClientView(GrandCedreView):
     can_delete = False
     column_exclude_list = ["is_owner"]
     column_searchable_list = ("first_name", "last_name")
@@ -78,7 +83,7 @@ class ClientView(ModelView):
     form_excluded_columns = ["is_owner", "contracts", "bookings", "invoices"]
 
 
-class ContractView(ModelView):
+class ContractView(GrandCedreView):
     column_searchable_list = ("client.first_name", "client.last_name")
 
     column_labels = {
@@ -90,7 +95,7 @@ class ContractView(ModelView):
     }
 
 
-class BookingView(ModelView):
+class BookingView(GrandCedreView):
     column_labels = {
         "client": "Client",
         "room": "Salle",
@@ -143,7 +148,7 @@ class BookingView(ModelView):
         )
 
 
-class InvoiceView(ModelView):
+class InvoiceView(GrandCedreView):
     def render_download_link(view, context, model, p):
         if model.is_valid:
             return Markup(
