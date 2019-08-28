@@ -1,6 +1,7 @@
 FROM python:3.7-slim
 RUN mkdir /app
 WORKDIR /app
+COPY requirements-weasyprint.txt .
 RUN apt-get update && \
     apt-get install -y --no-install-recommends\
     build-essential\
@@ -15,8 +16,10 @@ RUN apt-get update && \
     libgdk-pixbuf2.0-0\
     libffi-dev\
     shared-mime-info && \
-    apt-get clean
-COPY requirements.txt .
-RUN pip install -r requirements.txt gunicorn
+    pip install -r requirements-weasyprint.txt gunicorn && \
+    apt-get remove -y build-essential && \
+    apt-get clean && \
+    rm /var/lib/apt/lists
 COPY . .
+RUN pip install -r requirements.txt
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
