@@ -103,7 +103,9 @@ class BookingView(ModelView):
     )
     column_formatters = {
         "calendar_link": (
-            lambda v, c, m, p: Markup(f"<a href={m.calendar_link}>lien</a>")
+            lambda v, c, m, p: Markup(
+                f'<a href={m.calendar_link} target="_blank">lien</a>'
+            )
         ),
         "start_date": lambda v, c, m, p: (f"{m.start_datetime.date()}"),
         "start_time": lambda v, c, m, p: (
