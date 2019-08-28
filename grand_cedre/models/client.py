@@ -19,6 +19,7 @@ class Client(Base):
 
     contracts = relationship("Contract", back_populates="client")
     bookings = relationship("Booking", back_populates="client")
+    invoices = relationship("Invoice", back_populates="client")
 
     def __repr__(self):
         return f"<{self.__class__.__name__}: {str(self)}: {self.email}>"

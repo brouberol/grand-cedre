@@ -14,6 +14,7 @@ class Booking(Base):
     id = Column(Integer, primary_key=True)
     room_id = Column(Integer, ForeignKey("rooms.id"))
     client_id = Column(Integer, ForeignKey("clients.id"))
+    invoice_id = Column(Integer, ForeignKey("invoices.id"))
     start_datetime = Column(DateTime)
     end_datetime = Column(DateTime)
     calendar_link = Column(String, unique=True)
@@ -22,6 +23,7 @@ class Booking(Base):
 
     client = relationship("Client", back_populates="bookings")
     room = relationship("Room", back_populates="bookings")
+    invoice = relationship("Invoice", back_populates="bookings")
 
     def _format_time(self, t, sep="h"):
         return f"{str(t.hour).zfill(2)}{sep}{str(t.minute).zfill(2)}"
