@@ -115,8 +115,16 @@ class BookingView(ModelView):
 
 
 class InvoiceView(ModelView):
+    def render_download_link(view, context, model, p):
+        if model.is_valid:
+            return Markup(
+                f"<a href={url_for('download_invoice_as_pdf', invoice_id=model.id)}>💾</a>"
+            )
+        return ""
+
     column_searchable_list = ("client.first_name", "client.last_name")
     column_list = (
+        "number",
         "client",
         Invoice.period,
         "total_price",
@@ -133,11 +141,7 @@ class InvoiceView(ModelView):
     column_formatters = {
         "client": (lambda v, c, m, p: f"{m.client}"),
         "total_price": (lambda v, c, m, p: f"{m.total_price}{m.symbol}"),
-        "download": (
-            lambda v, c, m, p: Markup(
-                f"<a href={url_for('download_invoice_as_pdf', invoice_id=m.id)}>💾</a>"
-            )
-        ),
+        "download": render_download_link,
     }
 
 

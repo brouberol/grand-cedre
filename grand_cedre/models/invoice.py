@@ -93,6 +93,10 @@ class Invoice(Base):
         return int(self.period.split("-")[0])
 
     @property
+    def is_valid(self):
+        return not self.client.missing_details()
+
+    @property
     def filename(self):
         return f"{str(self.client).lower()}-{self.issued_at}.pdf".replace(" ", "-")
 
