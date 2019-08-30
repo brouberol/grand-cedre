@@ -9,6 +9,7 @@ class Config(object):
     DEBUG = False
     TESTING = False
     SQLALCHEMY_DATABASE_URI = "sqlite:///data/data.db"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     FLASK_ADMIN_SWATCH = "flatly"
     SECRET_KEY = b"\ry\xe0\x97\xe88\xed\x84\x05\xfdfN\x1daQ\xf8\x83!\xeanp\x80R\xd1"
 
