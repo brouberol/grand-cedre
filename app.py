@@ -103,6 +103,7 @@ class ContractView(GrandCedreView):
         "total_hours": "Heures réservées",
         "remaining_hours": "Heures restantes",
     }
+    form_excluded_columns = ["type"]
 
 
 class BookingView(GrandCedreView):
