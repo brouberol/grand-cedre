@@ -9,6 +9,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_babelex import Babel
 from markupsafe import Markup
 from sqlalchemy import or_
+from wtforms.validators import ValidationError
 
 from grand_cedre.models.client import Client
 from grand_cedre.models.contract import (
@@ -17,7 +18,6 @@ from grand_cedre.models.contract import (
     ExchangeContract,
     RecurrentContract,
 )
-from grand_cedre.models.room import Room
 from grand_cedre.models.booking import Booking
 from grand_cedre.models.invoice import Invoice
 from grand_cedre.config import Config
@@ -36,6 +36,11 @@ babel = Babel(app)
 @babel.localeselector
 def get_locale():
     return "fr"
+
+
+def validate_start_end_dates(form, field):
+    if form.start_date.data >= form.end_date.data:
+        raise ValidationError("La date de début doit être antérieure à la date de fin")
 
 
 class HomeAdminView(AdminIndexView):
@@ -104,6 +109,7 @@ class ContractView(GrandCedreView):
         "remaining_hours": "Heures restantes",
     }
     form_excluded_columns = ["type"]
+    form_args = {"start_date": {"validators": [_validate_start_end_dates]}}
 
 
 class BookingView(GrandCedreView):
