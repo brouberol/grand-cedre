@@ -111,6 +111,9 @@ class ContractView(GrandCedreView):
     form_excluded_columns = ["type"]
     form_args = {"start_date": {"validators": [validate_start_end_dates]}}
 
+    def get_query(self):
+        return self.session.query(self.model).filter_by(type="standard")
+
 
 class BookingView(GrandCedreView):
     column_labels = {
