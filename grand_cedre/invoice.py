@@ -7,9 +7,9 @@ from grand_cedre.models.booking import Booking
 from grand_cedre.models.invoice import Invoice
 
 
-def generate_invoice_per_user(session, start=None, end=None):
-    start = start or start_of_month()
-    end = end or end_of_month()
+def generate_invoice_per_user(session, year=None, month=None):
+    start = start_of_month(year, month)
+    end = end_of_month(year, month)
     for client in session.query(Client):
         if client.is_owner:
             logging.info(

@@ -116,11 +116,11 @@ class RoomBooking:
         return booking
 
 
-def list_monthly_bookings(calendar, session, start=None, end=None):
+def import_monthly_bookings(calendar, session, year=None, month=None):
     out = []
     service = get_service()
-    start = (start or start_of_month()).isoformat() + "Z"
-    end = (end or end_of_month()).isoformat() + "Z"
+    start = start_of_month(year, month).isoformat() + "Z"
+    end = end_of_month(year, month).isoformat() + "Z"
     logging.info(f"Fetching events from {start} to {end}")
     resp = (
         service.events()
