@@ -1,8 +1,6 @@
 import datetime
 import logging
 
-from decimal import Decimal
-
 from grand_cedre.utils import start_of_month, end_of_month
 from grand_cedre.service import get_service
 from grand_cedre.pricing import Duration, booking_price, NoMatchingPrice
@@ -65,6 +63,10 @@ class RoomBooking:
             individual=individual,
         )
 
+    def price_from_contract(self, contract):
+        if contract.type in ("standard", "recurrent", "exchange"):
+            return contract.get_booking_price()
+
     def resolve(self, session):
         creator = session.query(Client).filter_by(email=self.creator_email).first()
         if not creator:
@@ -78,20 +80,18 @@ class RoomBooking:
             logging.warning(
                 f"{self} could not be resolved. Checking if there's an existing contract"
             )
-
             contract = (
                 session.query(Contract)
                 .filter(Contract.client == self.creator)
-                .filter(Contract.start_date <= datetime.date.today())
-                .filter(Contract.end_date >= datetime.date.today())
-                .filter(Contract.booking_duration == self.duration)
+                .filter(Contract.start_date <= self.start.date())
+                .filter(Contract.end_date >= self.end.date())
                 .first()
             )
             if contract:
-                logging.info(
-                    f"Contract found! Using the hourly rate {contract.hourly_rate}"
-                )
-                self._price = Decimal(contract.hourly_rate) * Decimal(self.duration)
+                logging.info(f"Contract {contract} found!")
+                if contract.type == "flat_rate":
+                    contract.add_booking(self.duration)
+                self._price = self.price_from_contract(contract)
             else:
                 raise exc
 

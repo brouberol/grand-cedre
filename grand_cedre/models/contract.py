@@ -1,9 +1,11 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
+from decimal import Decimal
 
 from grand_cedre.models import Base
 from grand_cedre.models.client import Client
+from grand_cedre.pricing import booking_price as compute_booking_price
 
 
 # Several types of contract:
@@ -40,6 +42,9 @@ class Contract(Base):
     def __repr__(self):
         return f"<{self.__class__.__name__}: {str(self)}>"
 
+    def get_booking_price(self, booking_duration, individual):
+        return compute_booking_price(booking_duration, individual)
+
 
 class RecurrentContract(Contract):
     """A recurrent contract apply special fees for recurrent bookings."""
@@ -50,6 +55,9 @@ class RecurrentContract(Contract):
 
     id = Column(Integer, ForeignKey("standard_contracts.id"), primary_key=True)
     booking_price = Column(String, nullable=False)
+
+    def get_booking_price(self, *args, **kwargs):
+        return Decimal(self.booking_price)
 
 
 class ExchangeContract(Contract):
@@ -65,6 +73,9 @@ class ExchangeContract(Contract):
 
     id = Column(Integer, ForeignKey("standard_contracts.id"), primary_key=True)
 
+    def get_booking_price(self, *args, **kwargs):
+        return Decimal("0.0")
+
 
 class FlatRateContract(Contract):
     """A flat rate contract allows a client to pre-pay a given number of hours"""
@@ -77,3 +88,9 @@ class FlatRateContract(Contract):
     total_hours = Column(String, nullable=False)
     remaining_hours = Column(String, nullable=False)
     hourly_rate = Column(String, nullable=False)
+
+    def add_booking(self, booking_duration):
+        # What happens if we go under 0?
+        self.remaining_hours = str(
+            Decimal(self.remaining_hours) - Decimal(booking_duration)
+        )

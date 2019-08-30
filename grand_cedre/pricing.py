@@ -38,47 +38,47 @@ class Duration(Enum):
 
 
 COLLECTIVE_ROOM_PRICES = {
-    Duration.ONE_HOUR: Decimal("15.65"),
-    Duration.ONE_HOUR_AND_HALF: Decimal("20.45"),
-    Duration.TWO_HOURS: Decimal("26.55"),
-    Duration.TWO_HOURS_AND_HALF: Decimal("32.00"),
-    Duration.THREE_HOURS: Decimal("36.75"),
-    Duration.HALF_DAY: Decimal("51.75"),
-    Duration.WHOLE_DAY: Decimal("87.15"),
-    "weekend": Decimal("156.60"),
+    Duration.ONE_HOUR: "15.65",
+    Duration.ONE_HOUR_AND_HALF: "20.45",
+    Duration.TWO_HOURS: "26.55",
+    Duration.TWO_HOURS_AND_HALF: "32.00",
+    Duration.THREE_HOURS: "36.75",
+    Duration.HALF_DAY: "51.75",
+    Duration.WHOLE_DAY: "87.15",
+    "weekend": "156.60",
 }
 
 COLLECTIVE_ROOM_PRICES_HOURLY = {
-    Duration.ONE_HOUR: Decimal("15.65"),
-    Duration.ONE_HOUR_AND_HALF: Decimal("13.62"),
-    Duration.TWO_HOURS: Decimal("13.21"),
-    Duration.TWO_HOURS_AND_HALF: Decimal("12.80"),
-    Duration.THREE_HOURS: Decimal("12.26"),
-    Duration.HALF_DAY: Decimal("11.50"),
-    Duration.WHOLE_DAY: Decimal("10.90"),
-    "weekend": Decimal("9.78"),
+    Duration.ONE_HOUR: "15.65",
+    Duration.ONE_HOUR_AND_HALF: "13.62",
+    Duration.TWO_HOURS: "13.21",
+    Duration.TWO_HOURS_AND_HALF: "12.80",
+    Duration.THREE_HOURS: "12.26",
+    Duration.HALF_DAY: "11.50",
+    Duration.WHOLE_DAY: "10.90",
+    "weekend": "9.78",
 }
 
 INDIVIDUAL_ROOM_PRICES = {
-    Duration.ONE_HOUR: Decimal("10.90"),
-    Duration.ONE_HOUR_AND_HALF: Decimal("15.00"),
-    Duration.HALF_DAY: Decimal("40.50"),
-    Duration.WHOLE_DAY: Decimal("68.00"),
-    "prepaid": Decimal("360.00"),
+    Duration.ONE_HOUR: "10.90",
+    Duration.ONE_HOUR_AND_HALF: "15.00",
+    Duration.HALF_DAY: "40.50",
+    Duration.WHOLE_DAY: "68.00",
+    "prepaid": "360.00",
 }
 
 INDIVIDUAL_ROOM_PRICES_HOURLY = {
-    Duration.ONE_HOUR: Decimal("10.90"),
-    Duration.ONE_HOUR_AND_HALF: Decimal("10.00"),
-    Duration.HALF_DAY: Decimal("9.00"),
-    Duration.WHOLE_DAY: Decimal("8.50"),
-    "prepaid": Decimal("9.00"),
+    Duration.ONE_HOUR: "10.90",
+    Duration.ONE_HOUR_AND_HALF: "10.00",
+    Duration.HALF_DAY: "9.00",
+    Duration.WHOLE_DAY: "8.50",
+    "prepaid": "9.00",
 }
 
 
 def _booking_price(duration, pricing):
     try:
-        return pricing[duration]
+        return Decimal(pricing[duration])
     except KeyError:
         # This happens when someone has booked for a slot
         # for which we don't have an exact pricing for
@@ -88,8 +88,8 @@ def _booking_price(duration, pricing):
         )
 
 
-def booking_price(duration, individual=True):
+def booking_price(booking_duration, individual):
     if individual:
-        return _booking_price(duration, INDIVIDUAL_ROOM_PRICES)
+        return _booking_price(booking_duration, INDIVIDUAL_ROOM_PRICES)
     else:
-        return _booking_price(duration, COLLECTIVE_ROOM_PRICES)
+        return _booking_price(booking_duration, COLLECTIVE_ROOM_PRICES)
