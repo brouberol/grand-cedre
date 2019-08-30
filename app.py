@@ -205,7 +205,9 @@ class InvoiceView(GrandCedreView):
 admin.add_view(ClientView(Client, db.session, "Clients"))
 admin.add_view(ContractView(Contract, db.session, "Standards", category="Contrats"))
 admin.add_view(
-    ContractView(RecurrentContract, db.session, "Récurrents", category="Contrats")
+    ContractView(
+        RecurrentContract, db.session, "Réservations récurrentes", category="Contrats"
+    )
 )
 admin.add_view(
     ContractView(ExchangeContract, db.session, "Échanges", category="Contrats")
