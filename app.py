@@ -11,7 +11,12 @@ from markupsafe import Markup
 from sqlalchemy import or_
 
 from grand_cedre.models.client import Client
-from grand_cedre.models.contract import Contract
+from grand_cedre.models.contract import (
+    Contract,
+    FlatRateContract,
+    ExchangeContract,
+    RecurrentContract,
+)
 from grand_cedre.models.room import Room
 from grand_cedre.models.booking import Booking
 from grand_cedre.models.invoice import Invoice
@@ -85,14 +90,17 @@ class ClientView(GrandCedreView):
 
 
 class ContractView(GrandCedreView):
+    column_exclude_list = ["type"]
     column_searchable_list = ("client.first_name", "client.last_name")
 
     column_labels = {
         "client": "Client",
         "start_date": "Date de début",
         "end_date": "Date de fin",
-        "booking_duration": "Durée du créneau",
+        "booking_price": "Prix par réservation",
         "hourly_rate": "Taux horaire",
+        "total_hours": "Heures réservées",
+        "remaining_hours": "Heures restantes",
     }
 
 
@@ -184,7 +192,16 @@ class InvoiceView(GrandCedreView):
 
 
 admin.add_view(ClientView(Client, db.session, "Clients"))
-admin.add_view(ContractView(Contract, db.session, "Contrats"))
+admin.add_view(ContractView(Contract, db.session, "Standards", category="Contrats"))
+admin.add_view(
+    ContractView(RecurrentContract, db.session, "Récurrents", category="Contrats")
+)
+admin.add_view(
+    ContractView(ExchangeContract, db.session, "Échanges", category="Contrats")
+)
+admin.add_view(
+    ContractView(FlatRateContract, db.session, "Forfait", category="Contrats")
+)
 admin.add_view(BookingView(Booking, db.session, "Réservations"))
 admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
 
