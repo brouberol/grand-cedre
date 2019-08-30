@@ -17,7 +17,8 @@ class Client(Base):
     address = Column(String)
     zip_code = Column(String)
     city = Column(String)
-    email = Column(String, unique=True)
+    email = Column(String, unique=True, nullable=False)
+    phone_number = Column(String, unique=True)
     is_owner = Column(Boolean, default=False)
 
     contracts = relationship("Contract", back_populates="client")

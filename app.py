@@ -85,6 +85,7 @@ class ClientView(GrandCedreView):
         "address": "Adresse",
         "zip_code": "Code postal",
         "city": "Ville",
+        "phone_number": "Numéro de téléphone",
     }
     form_excluded_columns = ["is_owner", "contracts", "bookings", "invoices"]
 
