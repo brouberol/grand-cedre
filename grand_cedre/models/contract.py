@@ -35,10 +35,7 @@ class Contract(Base):
         super().__init__(*args, **kwargs)
 
     def __str__(self):
-        return (
-            f"{str(self.client)}: {self.start_date}->{self.end_date}:"
-            f" {self.booking_duration}h"
-        )
+        return f"{str(self.client)}: {self.start_date}->{self.end_date}: {self.type}"
 
     def __repr__(self):
         return f"<{self.__class__.__name__}: {str(self)}>"
