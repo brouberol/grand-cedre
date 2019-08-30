@@ -109,7 +109,7 @@ class ContractView(GrandCedreView):
         "remaining_hours": "Heures restantes",
     }
     form_excluded_columns = ["type"]
-    form_args = {"start_date": {"validators": [_validate_start_end_dates]}}
+    form_args = {"start_date": {"validators": [validate_start_end_dates]}}
 
 
 class BookingView(GrandCedreView):
