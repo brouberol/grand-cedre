@@ -23,3 +23,15 @@ def end_of_month(year=None, month=None):
     _, last_day = calendar.monthrange(day.year, day.month)
     monthend = day.replace(day=last_day, hour=0, minute=0, second=0)
     return monthend
+
+
+def get_or_create(session, model, defaults=None, **kwargs):
+    instance = session.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance, False
+    else:
+        params = dict((k, v) for k, v in kwargs.items())
+        params.update(defaults or {})
+        instance = model(**params)
+        session.add(instance)
+        return instance, True

@@ -17,6 +17,13 @@ from grand_cedre.models.contract import (
     ExchangeContract,
     OneShotContract,
 )
+from grand_cedre.models.pricing import (
+    IndividualRoomModularPricing,
+    CollectiveRoomRegularPricing,
+    CollectiveRoomOccasionalPricing,
+    FlatRatePricing,
+    RecurringPricing,
+)
 
 
 def validate_start_end_dates(form, field):
@@ -160,16 +167,53 @@ class InvoiceView(GrandCedreView):
     }
 
 
-class HomeAdminView(AdminIndexView):
-    def __init__(self, db, *args, **kwargs):
-        self.db = db
-        super().__init__(*args, **kwargs)
+class PricingView(GrandCedreView):
+    def format_duration(view, context, model, p):
+        if model.duration_to is None:
+            return f"]{model.duration_from},∞["
+        return f"]{model.duration_from}, {model.duration_to}]"
 
+    column_labels = {
+        "valid_from": "Date d'instauration",
+        "valid_to": "Date de révision",
+        "duration": "Durée",
+        "hourly_price": "Prix à l'heure",
+    }
+    column_list = ["duration", "hourly_price", "valid_from", "valid_to"]
+    column_formatters = {"duration": format_duration}
+
+
+class RecurringPricingView(GrandCedreView):
+    def format_duration(view, context, model, p):
+        return f"] {model.duration_from / 8}j, {model.duration_to / 8}j ]"
+
+    column_labels = {
+        "valid_from": "Date d'instauration",
+        "valid_to": "Date de révision",
+        "duration": "Durée",
+        "monthly_price": "Prix au mois",
+    }
+    column_list = ["duration", "monthly_price", "valid_from", "valid_to"]
+    column_formatters = {"duration": format_duration}
+
+
+class FlatRateView(GrandCedreView):
+    column_labels = {
+        "flat_rate": "Prix à l'heure",
+        "prepaid_hours": "Heures prépayées",
+        "valid_from": "Date d'instauration",
+        "valid_to": "Date de révision",
+    }
+    column_list = ["prepaid_hours", "flat_rate", "valid_from", "valid_to"]
+
+
+class HomeAdminView(AdminIndexView):
     @expose("/")
     def admin_home(self):
+        # detect flat rate contracts closing to expiry
         warning_messages = []
         clients_with_missing_details = (
-            self.db.session.query(Client)
+            db.session.query(Client)
             .filter(
                 or_(
                     Client.first_name.is_(None),
@@ -190,7 +234,7 @@ class HomeAdminView(AdminIndexView):
 
 
 admin = Admin(
-    app, name="grand-cedre", template_mode="bootstrap3", index_view=HomeAdminView(db)
+    app, name="grand-cedre", template_mode="bootstrap3", index_view=HomeAdminView()
 )
 
 admin.add_view(ClientView(Client, db.session, "Clients"))
@@ -208,3 +252,37 @@ admin.add_view(
 )
 admin.add_view(BookingView(Booking, db.session, "Réservations"))
 admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
+admin.add_view(
+    PricingView(
+        IndividualRoomModularPricing,
+        db.session,
+        "Salle individelle - Occupation modulaire",
+        category="Tarifs",
+    )
+)
+admin.add_view(
+    RecurringPricingView(
+        RecurringPricing,
+        db.session,
+        "Salle individelle - Occupation récurrente",
+        category="Tarifs",
+    )
+)
+
+admin.add_view(
+    PricingView(
+        CollectiveRoomRegularPricing,
+        db.session,
+        "Salle collective - Occupation regulière",
+        category="Tarifs",
+    )
+)
+admin.add_view(
+    PricingView(
+        CollectiveRoomOccasionalPricing,
+        db.session,
+        "Salle collective - Occupation occasionelle",
+        category="Tarifs",
+    )
+)
+admin.add_view(FlatRateView(FlatRatePricing, db.session, "Forfait", category="Tarifs"))
