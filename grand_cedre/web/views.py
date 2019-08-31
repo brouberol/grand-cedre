@@ -1,4 +1,5 @@
 import tempfile
+import os
 
 from weasyprint import HTML
 from flask import make_response, redirect, abort
@@ -6,6 +7,9 @@ from flask import make_response, redirect, abort
 from . import app
 from .db import db
 from grand_cedre.models.invoice import Invoice
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+output_dir = os.path.join(parent_dir, "output")
 
 
 @app.route("/")
@@ -19,7 +23,9 @@ def download_invoice_as_pdf(invoice_id):
     if not invoice:
         abort(404)
     html = invoice.to_html()
-    with tempfile.NamedTemporaryFile(suffix=".html", mode="w") as tmphtml:
+    with tempfile.NamedTemporaryFile(
+        dir=output_dir, suffix=".html", mode="w"
+    ) as tmphtml:
         tmphtml.write(html)
         tmphtml.flush()
         pdf = HTML(tmphtml.name).write_pdf()
