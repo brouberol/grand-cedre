@@ -5,6 +5,9 @@ from markupsafe import Markup
 from wtforms.validators import ValidationError
 from sqlalchemy import or_
 
+from . import app
+from .db import db
+
 from grand_cedre.models.booking import Booking
 from grand_cedre.models.client import Client
 from grand_cedre.models.invoice import Invoice
@@ -175,29 +178,22 @@ class HomeAdminView(AdminIndexView):
         return self.render("admin/home.html", warning_messages=warning_messages)
 
 
-def register_admin(app, db):
-    admin = Admin(
-        app,
-        name="grand-cedre",
-        template_mode="bootstrap3",
-        index_view=HomeAdminView(db),
-    )
+admin = Admin(
+    app, name="grand-cedre", template_mode="bootstrap3", index_view=HomeAdminView(db)
+)
 
-    admin.add_view(ClientView(Client, db.session, "Clients"))
-    admin.add_view(ContractView(Contract, db.session, "Standards", category="Contrats"))
-    admin.add_view(
-        ContractView(
-            RecurrentContract,
-            db.session,
-            "Réservations récurrentes",
-            category="Contrats",
-        )
+admin.add_view(ClientView(Client, db.session, "Clients"))
+admin.add_view(ContractView(Contract, db.session, "Standards", category="Contrats"))
+admin.add_view(
+    ContractView(
+        RecurrentContract, db.session, "Réservations récurrentes", category="Contrats"
     )
-    admin.add_view(
-        ContractView(ExchangeContract, db.session, "Échanges", category="Contrats")
-    )
-    admin.add_view(
-        ContractView(FlatRateContract, db.session, "Forfait", category="Contrats")
-    )
-    admin.add_view(BookingView(Booking, db.session, "Réservations"))
-    admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
+)
+admin.add_view(
+    ContractView(ExchangeContract, db.session, "Échanges", category="Contrats")
+)
+admin.add_view(
+    ContractView(FlatRateContract, db.session, "Forfait", category="Contrats")
+)
+admin.add_view(BookingView(Booking, db.session, "Réservations"))
+admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
