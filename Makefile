@@ -7,6 +7,6 @@ build: clean
 	docker build -t brouberol/grand-cedre .
 
 push: build
-	git stash
+	git stash || true
 	docker push brouberol/grand-cedre
-	git stash pop
+	git stash pop || true
