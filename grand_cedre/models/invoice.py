@@ -5,6 +5,7 @@ from jinja2 import Template
 from babel.dates import format_date
 from decimal import Decimal
 from collections import defaultdict
+from urllib.parse import urlencode
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
@@ -13,7 +14,8 @@ from sqlalchemy.schema import UniqueConstraint
 from grand_cedre.models import Base
 from grand_cedre.models.booking import Booking
 
-current_dir = os.path.abspath(os.path.dirname(__file__))
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+template_dir = os.path.join(parent_dir, "templates")
 
 CURRENCIES = {"EURO": "EURO"}
 SYMBOLS = {"EURO": "€"}
@@ -109,9 +111,16 @@ class Invoice(Base):
         template_variables["locale_issue_date"] = format_date(
             self.issued_at, "dd MMMM YYYY", locale=locale
         )
-        with open(
-            os.path.join(current_dir, "..", "templates", "invoice.html.j2")
-        ) as template_f:
+        with open(os.path.join(template_dir, "invoice.html.j2")) as template_f:
             template = Template(template_f.read())
             invoice_content = template.render(**template_variables)
         return invoice_content
+
+    def to_mailto_link(self):
+        params = {}
+        params["title"] = f"Votre facture du Grand Cèdre de {self.period}"
+        with open(os.path.join(template_dir, "invoice-email.j2")) as template_f:
+            template = Template(template_f.read())
+            params["body"] = template.render(invoice=self)
+
+        return f"mailto:{self.client.email}?{urlencode(params)}"

@@ -126,6 +126,11 @@ class InvoiceView(GrandCedreView):
             )
         return ""
 
+    def render_send_link(view, context, model, p):
+        if model.is_valid:
+            return Markup(f'<a href={model.to_mailto_link()} target="_blank">📧</a>')
+        return ""
+
     can_delete = False
     column_searchable_list = ("client.first_name", "client.last_name")
     column_list = (
@@ -135,6 +140,7 @@ class InvoiceView(GrandCedreView):
         "total_price",
         Invoice.issued_at,
         "download",
+        "send",
     )
     column_labels = {
         "number": "# Facture",
@@ -144,11 +150,13 @@ class InvoiceView(GrandCedreView):
         "issued_at": "Date d'édition",
         "download": "Télécharger",
         "currency": "Devise",
+        "send": "Envoyer",
     }
     column_formatters = {
         "client": (lambda v, c, m, p: f"{m.client}"),
         "total_price": (lambda v, c, m, p: f"{m.total_price}{m.symbol}"),
         "download": render_download_link,
+        "send": render_send_link,
     }
 
 
