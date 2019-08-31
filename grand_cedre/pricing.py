@@ -83,9 +83,7 @@ def _booking_price(duration, pricing):
         # This happens when someone has booked for a slot
         # for which we don't have an exact pricing for
         # ex: 2h in an individual room
-        raise NoMatchingPrice(
-            f"No pricing could be easily found for duration {duration}"
-        )
+        raise NoMatchingPrice(f"No pricing could be found for duration {duration}")
 
 
 def booking_price(booking_duration, individual):
