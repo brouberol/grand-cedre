@@ -11,6 +11,7 @@ from .db import db
 from grand_cedre.models.booking import Booking
 from grand_cedre.models.client import Client
 from grand_cedre.models.invoice import Invoice
+from grand_cedre.models.room import Room
 from grand_cedre.models.contract import (
     Contract,
     FlatRateContract,
@@ -167,6 +168,13 @@ class InvoiceView(GrandCedreView):
     }
 
 
+class RoomView(GrandCedreView):
+    column_labels = {
+        "name": "Nom",
+        "individual": "Individuelle?",
+        "calendar_id": "ID du Google Agenda",
+
+
 class PricingView(GrandCedreView):
     def format_duration(view, context, model, p):
         if model.duration_to is None:
@@ -252,6 +260,7 @@ admin.add_view(
 )
 admin.add_view(BookingView(Booking, db.session, "Réservations"))
 admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
+admin.add_view(RoomView(Room, db.session, "Salles"))
 admin.add_view(
     PricingView(
         IndividualRoomModularPricing,
