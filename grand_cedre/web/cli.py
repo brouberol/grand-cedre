@@ -2,18 +2,28 @@ import click
 import json
 import os
 
+from datetime import date
 from collections import defaultdict
+from decimal import Decimal
 
 from . import app
 from .db import db
 
 from grand_cedre.models.room import Room
+from grand_cedre.models.pricing import (
+    IndividualRoomModularPricing,
+    CollectiveRoomRegularPricing,
+    CollectiveRoomOccasionalPricing,
+    FlatRatePricing,
+    RecurringPricing,
+)
 from grand_cedre.pricing import NoMatchingPrice
 from grand_cedre.invoice import generate_invoice_per_user
 from grand_cedre.booking import import_monthly_bookings
-
+from grand_cedre.utils import get_or_create
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
+data_dir = os.path.join(current_dir, "..", "..", "data")
 
 
 @app.cli.command("generate-invoices")
@@ -53,18 +63,77 @@ def import_bookings(year, month):
     db.session.commit()
 
 
+def insert_prices_from_file(model, filename):
+    with open(os.path.join(data_dir, filename)) as f:
+        pricings = json.load(f)
+    for interval, price in pricings.items():
+        duration_from, duration_to = interval.split("->")
+        today = date.today()
+        if model == RecurringPricing:
+            duration_to = int(Decimal(duration_to) * 8)
+            duration_from = int(Decimal(duration_from) * 8)
+            pricing, created = get_or_create(
+                db.session,
+                model,
+                defaults={"valid_from": today},
+                monthly_price=price,
+                duration_from=duration_from,
+                duration_to=duration_to,
+            )
+        else:
+            duration_to = int(duration_to) if duration_to else None
+            duration_from = int(duration_from)
+            pricing, created = get_or_create(
+                db.session,
+                model,
+                defaults={"valid_from": today},
+                hourly_price=price,
+                duration_from=duration_from,
+                duration_to=duration_to,
+            )
+        if created:
+            app.logger.info(f"Creating {pricing.__class__.__name__} {pricing}")
+
+
 @app.cli.command("import-fixtures")
 def import_fixtures():
     """Insert fixtures into database"""
-    with open(os.path.join(current_dir, "..", "..", "data", "calendars.json")) as dataf:
+    with open(os.path.join(data_dir, "calendars.json")) as dataf:
         calendars = json.load(dataf)
 
     for calendar in calendars:
-        room = Room(
+        room, created = get_or_create(
+            db.session,
+            Room,
             name=calendar["summary"].split(" - ")[0],
             individual=calendar["metadata"]["individual"],
             calendar_id=calendar["id"],
         )
-        app.logger.info(f"Creating room {room}")
-        db.session.add(room)
+        if created:
+            app.logger.info(f"Creating room {room}")
+    insert_prices_from_file(
+        CollectiveRoomRegularPricing, "collective_regular_pricings.json"
+    )
+    insert_prices_from_file(
+        CollectiveRoomOccasionalPricing, "collective_occasional_pricings.json"
+    )
+    insert_prices_from_file(
+        IndividualRoomModularPricing, "individual_modular_pricings.json"
+    )
+    insert_prices_from_file(RecurringPricing, "individual_recurring_pricings.json")
+
+    flat_rate_pricing, created = get_or_create(
+        db.session,
+        FlatRatePricing,
+        defaults={"valid_from": date.today()},
+        duration_from=0,
+        duration_to=0,
+        flat_rate="9.00",
+        prepaid_hours=40,
+    )
+    if created:
+        app.logger.info(
+            f"Creating {flat_rate_pricing.__class__.__name__} {flat_rate_pricing}"
+        )
+
     db.session.commit()
