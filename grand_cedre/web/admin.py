@@ -2,7 +2,7 @@ from flask import url_for
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from markupsafe import Markup
-from wtforms.validators import ValidationError
+from wtforms.validators import ValidationError, Email
 from sqlalchemy import or_
 
 from . import app
@@ -44,6 +44,7 @@ class ClientView(GrandCedreView):
         "phone_number": "Numéro de téléphone",
     }
     form_excluded_columns = ["is_owner", "contracts", "bookings", "invoices"]
+    form_args = {"email": {"validators": [Email()]}}
 
 
 class ContractView(GrandCedreView):
