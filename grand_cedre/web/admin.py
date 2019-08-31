@@ -15,7 +15,7 @@ from grand_cedre.models.contract import (
     Contract,
     FlatRateContract,
     ExchangeContract,
-    RecurrentContract,
+    OneShotContract,
 )
 
 
@@ -187,7 +187,7 @@ admin.add_view(ClientView(Client, db.session, "Clients"))
 admin.add_view(ContractView(Contract, db.session, "Standards", category="Contrats"))
 admin.add_view(
     ContractView(
-        RecurrentContract, db.session, "Réservations récurrentes", category="Contrats"
+        OneShotContract, db.session, "Réservations occasionelles", category="Contrats"
     )
 )
 admin.add_view(
