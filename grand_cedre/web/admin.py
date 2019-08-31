@@ -20,8 +20,11 @@ from grand_cedre.models.contract import (
 
 
 def validate_start_end_dates(form, field):
-    if form.start_date.data >= form.end_date.data:
-        raise ValidationError("La date de début doit être antérieure à la date de fin")
+    if hasattr(form, "end_date"):
+        if form.start_date.data >= form.end_date.data:
+            raise ValidationError(
+                "La date de début doit être antérieure à la date de fin"
+            )
 
 
 class GrandCedreView(ModelView):
@@ -54,7 +57,6 @@ class ContractView(GrandCedreView):
     column_labels = {
         "client": "Client",
         "start_date": "Date de début",
-        "end_date": "Date de fin",
         "booking_price": "Prix par réservation",
         "hourly_rate": "Taux horaire",
         "total_hours": "Heures réservées",

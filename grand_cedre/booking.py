@@ -84,7 +84,6 @@ class RoomBooking:
                 session.query(Contract)
                 .filter(Contract.client == self.creator)
                 .filter(Contract.start_date <= self.start.date())
-                .filter(Contract.end_date >= self.end.date())
                 .first()
             )
             if contract:
