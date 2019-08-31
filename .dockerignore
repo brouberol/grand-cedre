@@ -4,3 +4,4 @@ Dockerfile
 Makefile
 **/__pycache__
 **/*.pyc
+tests
