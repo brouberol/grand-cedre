@@ -173,6 +173,7 @@ class RoomView(GrandCedreView):
         "name": "Nom",
         "individual": "Individuelle?",
         "calendar_id": "ID du Google Agenda",
+    }
 
 
 class PricingView(GrandCedreView):
