@@ -1,0 +1,71 @@
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Date
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declared_attr
+
+from grand_cedre.models import Base
+
+
+class Pricing(Base):
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50), nullable=False)
+    duration_from = Column(Integer, nullable=False)
+    duration_to = Column(Integer, nullable=True)
+    valid_from = Column(Date, nullable=False)
+    valid_to = Column(Date, nullable=True)
+
+    @declared_attr
+    def contracts(self):
+        return relationship("Contract", back_populates="pricing")
+
+    @declared_attr
+    def __tablename__(cls):
+        if cls.__name__ == "Pricing":
+            return "pricings"
+        return "pricings_" + cls._type.lower()
+
+    @declared_attr
+    def __mapper_args__(cls):
+        if cls.__name__ == "Pricing":
+            return {"polymorphic_on": "type", "polymorphic_identity": "Pricing"}
+        return {"polymorphic_identity": cls._type}
+
+
+class IndividualRoomModularPricing(Pricing):
+
+    _type = "individual_modular"
+
+    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
+    hourly_price = Column(String(8), nullable=False)
+
+
+class CollectiveRoomRegularPricing(Pricing):
+
+    _type = "collective_regular"
+
+    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
+    hourly_price = Column(String(8), nullable=False)
+
+
+class CollectiveRoomOccasionalPricing(Pricing):
+
+    _type = "collective_occasional"
+
+    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
+    hourly_price = Column(String(8), nullable=False)
+
+
+class FlatRatePricing(Pricing):
+
+    _type = "flat_rate"
+
+    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
+    flat_rate = Column(String(8), nullable=False)
+    prepaid_hours = Column(Integer, nullable=False)
+
+
+class RecurringPricing(Pricing):
+
+    _type = "recurring"
+
+    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
+    monthly_price = Column(String(8), nullable=False)
