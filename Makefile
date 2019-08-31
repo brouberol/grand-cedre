@@ -9,5 +9,6 @@ build: clean
 
 push: build
 	git stash || true
+	git push
 	docker push brouberol/grand-cedre
 	git stash pop || true
