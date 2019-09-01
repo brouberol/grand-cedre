@@ -38,10 +38,15 @@ def generate_invoices(year, month):
 @app.cli.command("import-bookings")
 @click.option("--year", type=int)
 @click.option("--month", type=int)
-def import_bookings(year, month):
+@click.option("--pdb", is_flag=True)
+def import_bookings(year, month, pdb):
     """Parse events from the Google calendars and insert them to DB"""
     with open(os.path.join(data_dir, "calendars.json")) as f:
         calendars = json.load(f)
+    if pdb:
+        import pdb
+
+        pdb.set_trace()
     import_monthly_bookings(calendars, db.session, year, month)
     db.session.commit()
 

@@ -57,7 +57,7 @@ class Contract(PolymorphicBase):
     __mapper_args__ = {"polymorphic_identity": ContractType.standard}
 
     def __str__(self):
-        return f"{str(self.client)}: {self.start_date}: {self.type}"
+        return f"{str(self.client)}: {self.start_date}: {self.type}:{self.room_type}"
 
     def ack_booking(self, booking_duration):
         # What happens if we go under 0?

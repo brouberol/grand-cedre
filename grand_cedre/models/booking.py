@@ -24,7 +24,10 @@ class DailyBooking(Base):
     invoice = relationship("Invoice", back_populates="daily_bookings")
 
     def __str__(self):
-        return f"[{self.client}] - {self.date} " f"{self.duration_hours}h"
+        return (
+            f"[{self.client}] - {self.date} - "
+            f"{'individual' if self.individual else 'collective'} {self.duration_hours}h"
+        )
 
     def __repr__(self):
         return f"<{self.__class__.__name__}: {(str(self))}: price:{self.price}>"
