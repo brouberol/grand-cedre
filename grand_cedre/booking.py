@@ -107,36 +107,28 @@ def get_daily_booking_pricing(daily_booking, contract, individual_status, sessio
     """
     pricing_model = pricing_by_contract_and_room[(contract.type, individual_status)]
     if contract.type == ContractType.flat_rate:
-        pricing = (
-            session.query(pricing_model)
-            .filter(
-                and_(
-                    pricing_model.valid_from <= daily_booking.date,
-                    or_(
-                        pricing_model.valid_to.is_(None),
-                        pricing_model.valid_to >= daily_booking.date,
-                    ),
-                )
+        pricing = session.query(pricing_model).filter(
+            and_(
+                pricing_model.valid_from <= daily_booking.date,
+                or_(
+                    pricing_model.valid_to.is_(None),
+                    pricing_model.valid_to >= daily_booking.date,
+                ),
             )
-            .one()
         )
     else:
-        pricing = (
-            session.query(pricing_model)
-            .filter(
-                and_(
-                    pricing_model.duration_from < daily_booking.duration_hours,
-                    pricing_model.duration_to >= daily_booking.duration_hours,
-                    pricing_model.valid_from <= daily_booking.date,
-                    or_(
-                        pricing_model.valid_to.is_(None),
-                        pricing_model.valid_to >= daily_booking.date,
-                    ),
-                )
+        pricing = session.query(pricing_model).filter(
+            and_(
+                pricing_model.duration_from < daily_booking.duration_hours,
+                pricing_model.duration_to >= daily_booking.duration_hours,
+                pricing_model.valid_from <= daily_booking.date,
+                or_(
+                    pricing_model.valid_to.is_(None),
+                    pricing_model.valid_to >= daily_booking.date,
+                ),
             )
-            .one()
         )
-    return pricing
+    return pricing.first()
 
 
 def insert_daily_bookings_in_db(daily_bookings_by_client, session):
@@ -175,7 +167,13 @@ def insert_daily_bookings_in_db(daily_bookings_by_client, session):
                 daily_booking_pricing = get_daily_booking_pricing(
                     daily_booking, daily_booking_contract, room_type, session
                 )
-                logger.info(f"Found pricing {daily_booking_pricing}")
+                if daily_booking_pricing:
+                    logger.info(f"Found pricing {daily_booking_pricing}")
+                else:
+                    logger.error(
+                        f"No pricing found for client {client} and booking {daily_booking}"
+                    )
+                    continue
 
                 # Compute the price from the pricing type
                 daily_booking_price = str(
