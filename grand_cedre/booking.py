@@ -106,20 +106,36 @@ def get_daily_booking_pricing(daily_booking, contract, individual_status, sessio
     Get the pricing that was applicable at the time of the booking
     """
     pricing_model = pricing_by_contract_and_room[(contract.type, individual_status)]
-    pricing = (
-        session.query(pricing_model)
-        .filter(
-            and_(
-                pricing_model.duration_from < daily_booking.duration_hours,
-                pricing_model.duration_to >= daily_booking.duration_hours,
-                or_(
-                    pricing_model.valid_to.is_(None),
-                    pricing_model.valid_to >= daily_booking.date,
-                ),
+    if pricing_model.type == ContractType.flat_rate:
+        pricing = (
+            session.query(pricing_model)
+            .filter(
+                and_(
+                    pricing_model.valid_from <= daily_booking.date,
+                    or_(
+                        pricing_model.valid_to.is_(None),
+                        pricing_model.valid_to >= daily_booking.date,
+                    ),
+                )
             )
+            .one()
         )
-        .one()
-    )
+    else:
+        pricing = (
+            session.query(pricing_model)
+            .filter(
+                and_(
+                    pricing_model.duration_from < daily_booking.duration_hours,
+                    pricing_model.duration_to >= daily_booking.duration_hours,
+                    pricing_model.valid_from <= daily_booking.date,
+                    or_(
+                        pricing_model.valid_to.is_(None),
+                        pricing_model.valid_to >= daily_booking.date,
+                    ),
+                )
+            )
+            .one()
+        )
     return pricing
 
 
