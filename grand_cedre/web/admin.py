@@ -121,8 +121,9 @@ class ContractView(GrandCedreView):
         "remaining_hours": "Heures restantes",
         "room_type": "Type de salle",
         "type": "Type de contrat",
+        "total_hours": "Heures prépayées",
+        "remaining_hours": "Heures restantes",
     }
-    column_list = ["type", "client", "start_date", "room_type"]
     form_excluded_columns = ["type"]
     form_args = {
         "start_date": {"validators": [validate_start_end_dates], "default": date.today},
