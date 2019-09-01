@@ -68,6 +68,9 @@ class RoomBooking:
 
     @classmethod
     def from_event(cls, event, individual):
+        if "dateTime" not in event["start"] or "dateTime" not in event["end"]:
+            logger.info("Ignoring event spanning multiple days")
+            return
         return cls(
             start=datetime.datetime.strptime(
                 event["start"]["dateTime"], "%Y-%m-%dT%H:%M:%S+%f:00"
@@ -222,6 +225,8 @@ def import_monthly_bookings(calendars, session, year=None, month=None):
         )
         for event in resp.get("items", []):
             booking = RoomBooking.from_event(event, calendar["metadata"]["individual"])
+            if not booking:
+                continue
             try:
                 booking.resolve(session)
             except NoContractFound:
