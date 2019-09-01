@@ -35,7 +35,9 @@ class Pricing(Base):
 
 class HourlyPricing:
     def daily_booking_price(self, daily_booking):
-        return Decimal(self.hourly_price) * Decimal(daily_booking.duration_hours)
+        return (
+            Decimal(self.hourly_price) * Decimal(daily_booking.duration_hours)
+        ).quantize(Decimal("1.00"))
 
 
 class IndividualRoomModularPricing(HourlyPricing, Pricing):
@@ -77,7 +79,7 @@ class FlatRatePricing(Pricing):
         )
 
     def daily_booking_price(self, daily_booking):
-        return Decimal("0.0")
+        return Decimal("0.00")
 
 
 class RecurringPricing(Pricing):
@@ -94,4 +96,4 @@ class RecurringPricing(Pricing):
         )
 
     def daily_booking_price(self, daily_booking):
-        return Decimal("0.0")
+        return Decimal("0.00")

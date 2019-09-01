@@ -12,6 +12,7 @@ static_dir = os.path.join(parent_dir, "static")
 
 def setup_logging(app):
     app.logger.setLevel(logging.INFO)
+    logging.getLogger("grand-cedre").setLevel(logging.DEBUG)
     logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 
 

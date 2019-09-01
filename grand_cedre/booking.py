@@ -3,7 +3,7 @@ import logging
 
 from collections import defaultdict
 from sqlalchemy import and_, or_
-from grand_cedre.utils import start_of_month, end_of_month
+from grand_cedre.utils import start_of_month, end_of_month, get_or_create
 from grand_cedre.service import get_service
 from grand_cedre.models.contract import Contract, ContractType
 from grand_cedre.models.client import Client
@@ -25,6 +25,8 @@ pricing_by_contract_and_room = {
     (ContractType.flat_rate, RoomType.individual): FlatRatePricing,
     (ContractType.recurring, RoomType.individual): RecurringPricing,
 }
+
+logger = logging.getLogger("grand-cedre.booking")
 
 
 class NoContractFound(Exception):
@@ -88,7 +90,7 @@ class RoomBooking:
 
         self._creator = creator
 
-        logging.debug(f"Checking if there's an existing contract for client {creator}")
+        logger.debug(f"Checking if there's an existing contract for client {creator}")
         contract = (
             session.query(Contract)
             .filter(Contract.client == self.creator)
@@ -131,33 +133,50 @@ def insert_daily_bookings_in_db(daily_bookings_by_client, session):
             # Iterate over the client daily bookings grouped by room type
             for (room_type, daily_bookings) in daily_bookings_by_room_type.items():
 
+                logger.info(
+                    f"Resolving bookings for {client}, {date}, room_type: {room_type}"
+                )
                 # Compute the total booking duration for the client/day/room_type
                 duration_hours = sum([booking.duration for booking in daily_bookings])
-                daily_booking = DailyBooking(
-                    client=client,
-                    duration_hours=duration_hours,
-                    individual=room_type == RoomType.individual,
-                    date=daily_bookings[0].day,
+                daily_booking_kwargs = {
+                    "client": client,
+                    "duration_hours": duration_hours,
+                    "individual": room_type == RoomType.individual,
+                    "date": daily_bookings[0].day,
+                }
+                # Get or create the row in DB
+
+                daily_booking, created = get_or_create(
+                    session, DailyBooking, **daily_booking_kwargs
                 )
+                logger.info(f"Bookings: {daily_booking}")
 
                 # Fetch the client contract related to the daily booking
                 daily_booking_contract = daily_booking.contract
+                logger.info(f"Found contract {daily_booking_contract}")
 
                 # Infer pricing from the contract type and room type
                 daily_booking_pricing = get_daily_booking_pricing(
                     daily_booking, daily_booking_contract, room_type, session
                 )
+                logger.info(f"Found pricing {daily_booking_pricing}")
 
                 # Compute the price from the pricing type
-                daily_booking.price = str(
+                daily_booking_price = str(
                     daily_booking_pricing.daily_booking_price(daily_booking)
                 )
+                logger.info(f"Computed price: {daily_booking_price}")
+                daily_booking.price = daily_booking_price
 
-                # If we're dealing with a flat rate contract, retract consumed
-                # hours from the available credit
-                if daily_booking_contract.type == ContractType.flat_rate:
-                    daily_booking_contract.add_booking(daily_booking)
-                    session.add(daily_booking_contract)
+                if created:
+                    logger.info(f"Created {daily_booking}")
+                    # If we're dealing with a flat rate contract, retract consumed
+                    # hours from the available credit (the first time only!)
+                    if daily_booking_contract.type == ContractType.flat_rate:
+                        daily_booking_contract.add_booking(daily_booking)
+                        session.add(daily_booking_contract)
+                else:
+                    logger.info(f"Updating {daily_booking}")
 
                 session.add(daily_booking)
 
@@ -181,7 +200,7 @@ def import_monthly_bookings(calendars, session, year=None, month=None):
             )
             .execute()
         )
-        logging.info(
+        logger.info(
             (
                 f"Fetching monthly bookings for calendar {calendar['summary']} "
                 "from {start} to {end}"
@@ -192,7 +211,7 @@ def import_monthly_bookings(calendars, session, year=None, month=None):
             try:
                 booking.resolve(session)
             except NoContractFound:
-                logging.warning(
+                logger.warning(
                     f"No contract was found for the creator of booking {booking}"
                 )
             else:
