@@ -4,7 +4,6 @@ import os
 from jinja2 import Template
 from babel.dates import format_date
 from decimal import Decimal
-from collections import defaultdict
 from urllib.parse import urlencode
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Date

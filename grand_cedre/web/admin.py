@@ -1,9 +1,14 @@
 from flask import url_for
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
-from markupsafe import Markup
+from flask_admin.form.fields import Select2Field
+from flask_admin.model.form import converts
+from flask_admin.contrib.sqla.form import AdminModelConverter
+from markupsafe import Markup, escape
 from wtforms.validators import ValidationError, Email
 from sqlalchemy import or_
+from datetime import date
+from sqlalchemy.sql.sqltypes import Enum as SQLEnum
 
 from . import app
 from .db import db
@@ -18,6 +23,8 @@ from grand_cedre.models.contract import (
     ExchangeContract,
     OneShotContract,
     RecurringContract,
+    RoomType,
+    ContractTypeEnum,
 )
 from grand_cedre.models.pricing import (
     IndividualRoomModularPricing,
@@ -26,6 +33,41 @@ from grand_cedre.models.pricing import (
     FlatRatePricing,
     RecurringPricing,
 )
+
+
+class EnumField(Select2Field):
+    def __init__(self, column, **kwargs):
+        assert isinstance(column.type, SQLEnum)
+
+        def coercer(value):
+            # coerce incoming value into an enum value
+            if isinstance(value, column.type.enum_class):
+                return value
+            elif isinstance(value, str):
+                return column.type.enum_class[value]
+            else:
+                assert False
+
+        choices = [(v._name_, escape(v._value_)) for v in kwargs.pop("model")]
+        super(EnumField, self).__init__(coerce=coercer, choices=choices, **kwargs)
+
+    def pre_validate(self, form):
+        # we need to override the default SelectField validation because it
+        # apparently tries to directly compare the field value with the choice
+        # key; it is not clear how that could ever work in cases where the
+        # values and choice keys must be different types
+
+        for (v, _) in self.choices:
+            if self.data == self.coerce(v):
+                break
+        else:
+            raise ValueError(self.gettext("Not a valid choice"))
+
+
+class CustomAdminConverter(AdminModelConverter):
+    @converts("sqlalchemy.sql.sqltypes.Enum")
+    def conv_enum(self, field_args, **extra):
+        return EnumField(column=extra["column"], **field_args)
 
 
 def validate_start_end_dates(form, field):
@@ -37,6 +79,8 @@ def validate_start_end_dates(form, field):
 
 
 class GrandCedreView(ModelView):
+    model_form_converter = CustomAdminConverter
+
     def search_placeholder(self):
         return "Recherche"
 
@@ -60,9 +104,7 @@ class ClientView(GrandCedreView):
 
 
 class ContractView(GrandCedreView):
-    column_exclude_list = ["type"]
     column_searchable_list = ("client.first_name", "client.last_name")
-
     column_labels = {
         "client": "Client",
         "start_date": "Date de début",
@@ -71,9 +113,18 @@ class ContractView(GrandCedreView):
         "total_hours": "Heures réservées",
         "remaining_hours": "Heures restantes",
         "room_type": "Type de salle",
+        "type": "Type de contrat",
     }
+    column_list = ["type", "client", "start_date", "room_type"]
     form_excluded_columns = ["type"]
-    form_args = {"start_date": {"validators": [validate_start_end_dates]}}
+    form_args = {
+        "start_date": {"validators": [validate_start_end_dates], "default": date.today},
+        "room_type": {"model": RoomType},
+    }
+    column_formatters = {
+        "room_type": (lambda v, c, m, p: f"{RoomType[m.room_type._name_]._value_}"),
+        "type": (lambda v, c, m, p: f"{ContractTypeEnum[m.type]._value_}"),
+    }
 
     def get_query(self):
 
@@ -89,11 +140,17 @@ class BookingView(GrandCedreView):
         "price": "Prix",
         "duration_hours": "Durée (h)",
         "individual": "Salle individelle?",
+        "room_type": "Type de salle",
     }
-    column_list = ["client", "date", "price"]
+    column_list = ["room_type", "client", "date", "price"]
     column_filters = ["price"]
     column_searchable_list = ("client.first_name", "client.last_name", "date")
     form_excluded_columns = ("frozen", "invoice")
+    column_formatters = {
+        "room_type": (
+            lambda v, c, m, p: f"{RoomType[m.contract.room_type._name_]._value_}"
+        )
+    }
 
 
 class InvoiceView(GrandCedreView):
@@ -129,6 +186,7 @@ class InvoiceView(GrandCedreView):
         "download": "Télécharger",
         "currency": "Devise",
         "send": "Envoyer",
+        "daily_bookings": "Réservations",
     }
     column_formatters = {
         "client": (lambda v, c, m, p: f"{m.client}"),
@@ -136,6 +194,7 @@ class InvoiceView(GrandCedreView):
         "download": render_download_link,
         "send": render_send_link,
     }
+    form_args = {"issued_at": {"default": date.today}}
 
 
 class RoomView(GrandCedreView):

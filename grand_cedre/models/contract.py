@@ -11,8 +11,11 @@ from grand_cedre.models.pricing import Pricing
 
 
 class RoomType(Enum):
-    individual = 0
-    collective = 1
+    individual = "Cabinet"
+    collective = "Salle collective"
+
+    def __str__(self):
+        return self.name
 
 
 class ContractType:
@@ -21,6 +24,14 @@ class ContractType:
     exchange = "exchange"
     recurring = "recurring"
     flat_rate = "flat_rate"
+
+
+class ContractTypeEnum(Enum):
+    standard = "Standard"
+    one_shot = "Réservation occasionelle"
+    exchange = "Échange"
+    recurring = "Occupation récurrente"
+    flat_rate = "Forfait"
 
 
 class Contract(PolymorphicBase):
