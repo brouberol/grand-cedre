@@ -189,7 +189,7 @@ def insert_daily_bookings_in_db(daily_bookings_by_client, session):
                     # If we're dealing with a flat rate contract, retract consumed
                     # hours from the available credit (the first time only!)
                     if daily_booking_contract.type == ContractType.flat_rate:
-                        daily_booking_contract.add_booking(daily_booking)
+                        daily_booking_contract.ack_booking(daily_booking)
                         session.add(daily_booking_contract)
                 else:
                     logger.info(f"Updating {daily_booking}")
