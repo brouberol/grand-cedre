@@ -40,24 +40,9 @@ def generate_invoices(year, month):
 @click.option("--month", type=int)
 def import_bookings(year, month):
     """Parse events from the Google calendars and insert them to DB"""
-    calendars = json.load(
-        open(os.path.join(current_dir, "..", "..", "data", "calendars.json"))
-    )
-    monthly_bookings = defaultdict(list)
-
-    bookings = import_monthly_bookings(calendars, db.session, year, month)
-
-    #     for booking in bookings:
-    #         try:
-    #             app.logger.info(f"{booking} will be billed {booking.price} euro")
-    #         except NoMatchingPrice:
-    #             app.logger.error(f"{booking} could not be priced")
-    #         else:
-    #             monthly_bookings[booking.creator.email].append(booking)
-
-    # for user, bookings in monthly_bookings.items():
-    #     total_owed = sum([booking.price for booking in bookings])
-    #     app.logger.info(f"{user} owes a total of {total_owed} ")
+    with open(os.path.join(data_dir, "calendars.json")) as f:
+        calendars = json.load(f)
+    import_monthly_bookings(calendars, db.session, year, month)
     db.session.commit()
 
 

@@ -56,9 +56,9 @@ class Invoice(Base):
         return f"{self.client} {self.period}: {self.total_price}{self.symbol}"
 
     @staticmethod
-    def format_period():
-        today = datetime.date.today()
-        return f"{today.year}-{str(today.month).zfill(2)}"
+    def format_period(date=None):
+        date = date or datetime.date.today()
+        return f"{date.year}-{str(date.month).zfill(2)}"
 
     @property
     def symbol(self):
@@ -66,7 +66,7 @@ class Invoice(Base):
 
     @property
     def total_price(self):
-        return sum([Decimal(booking.price) for booking in self.bookings])
+        return sum([Decimal(booking.price) for booking in self.daily_bookings])
 
     @property
     def number(self):
@@ -76,7 +76,7 @@ class Invoice(Base):
     @property
     def bookings_per_room(self):
         out = defaultdict(dict)
-        for booking in self.bookings:
+        for booking in self.daily_bookings:
             if booking.duration not in out[booking.room]:
                 out[booking.room][booking.duration] = RoomBookings([booking])
             else:
