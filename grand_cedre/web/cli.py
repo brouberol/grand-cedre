@@ -39,7 +39,8 @@ def generate_invoices(year, month):
 @click.option("--year", type=int)
 @click.option("--month", type=int)
 @click.option("--pdb", is_flag=True)
-def import_bookings(year, month, pdb):
+@click.option("--no-commit", is_flag=True)
+def import_bookings(year, month, pdb, no_commit):
     """Parse events from the Google calendars and insert them to DB"""
     with open(os.path.join(data_dir, "calendars.json")) as f:
         calendars = json.load(f)
@@ -48,7 +49,8 @@ def import_bookings(year, month, pdb):
 
         pdb.set_trace()
     import_monthly_bookings(calendars, db.session, year, month)
-    db.session.commit()
+    if not no_commit:
+        db.session.commit()
 
 
 def insert_prices_from_file(model, filename):
