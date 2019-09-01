@@ -2,6 +2,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+Base.__repr__ = lambda self: f"<{self.__class__.__name__}: {str(self)}>"
+
 
 class PolymorphicBase(Base):
     __abstract__ = True
@@ -13,8 +15,20 @@ class PolymorphicBase(Base):
         super().__init__(*args, **kwargs)
 
 
-from .booking import Booking
+from .booking import DailyBooking
 from .client import Client
 from .invoice import Invoice
-from .contract import Contract
 from .room import Room
+from grand_cedre.models.contract import (
+    Contract,
+    FlatRateContract,
+    ExchangeContract,
+    OneShotContract,
+)
+from grand_cedre.models.pricing import (
+    IndividualRoomModularPricing,
+    CollectiveRoomRegularPricing,
+    CollectiveRoomOccasionalPricing,
+    FlatRatePricing,
+    RecurringPricing,
+)

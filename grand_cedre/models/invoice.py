@@ -12,7 +12,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
 
 from grand_cedre.models import Base
-from grand_cedre.models.booking import Booking
+from grand_cedre.models.booking import DailyBooking
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 template_dir = os.path.join(parent_dir, "templates")
@@ -49,14 +49,11 @@ class Invoice(Base):
     issued_at = Column(Date)
     currency = Column(String, default="EURO")
 
-    bookings = relationship("Booking", back_populates="invoice")
+    daily_bookings = relationship("DailyBooking", back_populates="invoice")
     client = relationship("Client", back_populates="invoices")
 
     def __str__(self):
         return f"{self.client} {self.period}: {self.total_price}{self.symbol}"
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__} {str(self)}>"
 
     @staticmethod
     def format_period():

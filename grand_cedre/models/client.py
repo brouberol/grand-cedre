@@ -22,7 +22,7 @@ class Client(Base):
     is_owner = Column(Boolean, default=False)
 
     contracts = relationship("Contract", back_populates="client")
-    bookings = relationship("Booking", back_populates="client")
+    daily_bookings = relationship("DailyBooking", back_populates="client")
     invoices = relationship("Invoice", back_populates="client")
 
     def __repr__(self):

@@ -45,21 +45,19 @@ def import_bookings(year, month):
     )
     monthly_bookings = defaultdict(list)
 
-    for calendar in calendars:
-        app.logger.info(f"Fetching monthly bookings for calendar {calendar['summary']}")
-        bookings = import_monthly_bookings(calendar, db.session, year, month)
+    bookings = import_monthly_bookings(calendars, db.session, year, month)
 
-        for booking in bookings:
-            try:
-                app.logger.info(f"{booking} will be billed {booking.price} euro")
-            except NoMatchingPrice:
-                app.logger.error(f"{booking} could not be priced")
-            else:
-                monthly_bookings[booking.creator.email].append(booking)
+    #     for booking in bookings:
+    #         try:
+    #             app.logger.info(f"{booking} will be billed {booking.price} euro")
+    #         except NoMatchingPrice:
+    #             app.logger.error(f"{booking} could not be priced")
+    #         else:
+    #             monthly_bookings[booking.creator.email].append(booking)
 
-    for user, bookings in monthly_bookings.items():
-        total_owed = sum([booking.price for booking in bookings])
-        app.logger.info(f"{user} owes a total of {total_owed} ")
+    # for user, bookings in monthly_bookings.items():
+    #     total_owed = sum([booking.price for booking in bookings])
+    #     app.logger.info(f"{user} owes a total of {total_owed} ")
     db.session.commit()
 
 

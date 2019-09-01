@@ -13,8 +13,6 @@ class Room(Base):
     individual = Column(Boolean)
     calendar_id = Column(String, unique=True)
 
-    bookings = relationship("Booking", back_populates="room")
-
     def __str__(self):
         return self.name
 

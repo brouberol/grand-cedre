@@ -1,12 +1,18 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy.types import Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
 from decimal import Decimal
+from enum import Enum
 
 from grand_cedre.models import PolymorphicBase
 from grand_cedre.models.client import Client
 from grand_cedre.models.pricing import Pricing
-from grand_cedre.pricing import booking_price as compute_booking_price
+
+
+class RoomType(Enum):
+    individual = 0
+    collective = 1
 
 
 # Several types of contract:
@@ -19,16 +25,15 @@ from grand_cedre.pricing import booking_price as compute_booking_price
 
 class Contract(PolymorphicBase):
     __tablename__ = "standard_contracts"
-    __table_args__ = (UniqueConstraint("client_id", "start_date"),)
+    __table_args__ = (UniqueConstraint("client_id", "start_date", "room_type"),)
     _type = "standard"
 
     id = Column(Integer, primary_key=True)
     client_id = Column(Integer, ForeignKey("clients.id"))
-    pricing_id = Column(Integer, ForeignKey("pricings.id"))
     start_date = Column(Date)
+    room_type = Column(SQLEnum(RoomType))
 
     client = relationship("Client", back_populates="contracts")
-    pricing = relationship("Pricing", back_populates="contracts")
     type = Column(String(50), nullable=False)
 
     # This allows us to establish a polymorphic relationship between
@@ -36,13 +41,7 @@ class Contract(PolymorphicBase):
     __mapper_args__ = {"polymorphic_identity": "standard"}
 
     def __str__(self):
-        return f"{str(self.client)}: {self.start_date}->{self.end_date}: {self.type}"
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__}: {str(self)}>"
-
-    def get_booking_price(self, booking_duration, individual):
-        return compute_booking_price(booking_duration, individual)
+        return f"{str(self.client)}: {self.start_date}: {self.type}"
 
 
 class OneShotContract(Contract):
@@ -50,12 +49,9 @@ class OneShotContract(Contract):
 
     __tablename__ = "one_shot_contracts"
     __mapper_args__ = {"polymorphic_identity": "recurrent"}
-    _type = "recurrent"
+    _type = "one_shot"
 
     id = Column(Integer, ForeignKey("standard_contracts.id"), primary_key=True)
-
-    def get_booking_price(self, *args, **kwargs):
-        pass
 
 
 class ExchangeContract(Contract):
@@ -89,11 +85,18 @@ class FlatRateContract(Contract):
     total_hours = Column(String, nullable=False)
     remaining_hours = Column(String, nullable=False)
 
-    def get_booking_price(self):
-        return Decimal(self._price / self._nb_prepaid_hours)
-
-    def add_booking(self, booking_duration):
+    def ack_booking(self, booking_duration):
         # What happens if we go under 0?
         self.remaining_hours = str(
             Decimal(self.remaining_hours) - Decimal(booking_duration)
         )
+
+
+class RecurringContract(Contract):
+    """A recurring contract allows a client to regularly book rooms for preferential prices"""
+
+    __tablename__ = "recurring_contracts"
+    __mapper_args__ = {"polymorphic_identity": "recurring"}
+    _type = "recurring"
+
+    id = Column(Integer, ForeignKey("standard_contracts.id"), primary_key=True)

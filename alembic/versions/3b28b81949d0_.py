@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 99034f31271b
+Revision ID: 3b28b81949d0
 Revises: 
-Create Date: 2019-08-30 09:11:22.644358
+Create Date: 2019-08-31 23:04:24.748173
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '99034f31271b'
+revision = '3b28b81949d0'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,6 +33,15 @@ def upgrade():
     sa.UniqueConstraint('first_name', 'last_name', 'email'),
     sa.UniqueConstraint('phone_number')
     )
+    op.create_table('pricings',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('type', sa.String(length=50), nullable=False),
+    sa.Column('duration_from', sa.Integer(), nullable=False),
+    sa.Column('duration_to', sa.Integer(), nullable=True),
+    sa.Column('valid_from', sa.Date(), nullable=False),
+    sa.Column('valid_to', sa.Date(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('rooms',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
@@ -52,32 +61,60 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('client_id', 'period')
     )
+    op.create_table('pricings_collective_occasional',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('hourly_price', sa.String(length=8), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['pricings.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('pricings_collective_regular',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('hourly_price', sa.String(length=8), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['pricings.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('pricings_flat_rate',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('flat_rate', sa.String(length=8), nullable=False),
+    sa.Column('prepaid_hours', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['pricings.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('pricings_individual_modular',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('hourly_price', sa.String(length=8), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['pricings.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('pricings_recurring',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('monthly_price', sa.String(length=8), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['pricings.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('standard_contracts',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('client_id', sa.Integer(), nullable=True),
     sa.Column('start_date', sa.Date(), nullable=True),
-    sa.Column('end_date', sa.Date(), nullable=True),
+    sa.Column('room_type', sa.Enum('individual', 'collective', name='roomtype'), nullable=True),
     sa.Column('type', sa.String(length=50), nullable=False),
     sa.ForeignKeyConstraint(['client_id'], ['clients.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('client_id', 'start_date', 'end_date')
+    sa.UniqueConstraint('client_id', 'start_date')
     )
-    op.create_table('bookings',
+    op.create_table('daily_bookings',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('room_id', sa.Integer(), nullable=True),
     sa.Column('client_id', sa.Integer(), nullable=True),
     sa.Column('invoice_id', sa.Integer(), nullable=True),
-    sa.Column('start_datetime', sa.DateTime(), nullable=True),
-    sa.Column('end_datetime', sa.DateTime(), nullable=True),
-    sa.Column('calendar_link', sa.String(), nullable=True),
+    sa.Column('date', sa.Date(), nullable=True),
+    sa.Column('duration_hours', sa.String(), nullable=True),
     sa.Column('price', sa.String(), nullable=True),
+    sa.Column('individual', sa.Boolean(), nullable=True),
     sa.Column('frozen', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['clients.id'], ),
     sa.ForeignKeyConstraint(['invoice_id'], ['invoices.id'], ),
-    sa.ForeignKeyConstraint(['room_id'], ['rooms.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('calendar_link'),
-    sa.UniqueConstraint('room_id', 'start_datetime', 'end_datetime')
+    sa.UniqueConstraint('client_id', 'date', 'individual')
     )
     op.create_table('exchange_contracts',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -86,15 +123,19 @@ def upgrade():
     )
     op.create_table('flate_rate_contracts',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('end_date', sa.Date(), nullable=True),
     sa.Column('total_hours', sa.String(), nullable=False),
     sa.Column('remaining_hours', sa.String(), nullable=False),
-    sa.Column('hourly_rate', sa.String(), nullable=False),
     sa.ForeignKeyConstraint(['id'], ['standard_contracts.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('recurrent_contracts',
+    op.create_table('one_shot_contracts',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('booking_price', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['id'], ['standard_contracts.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('recurring_contracts',
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id'], ['standard_contracts.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -103,12 +144,19 @@ def upgrade():
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table('recurrent_contracts')
+    op.drop_table('recurring_contracts')
+    op.drop_table('one_shot_contracts')
     op.drop_table('flate_rate_contracts')
     op.drop_table('exchange_contracts')
-    op.drop_table('bookings')
+    op.drop_table('daily_bookings')
     op.drop_table('standard_contracts')
+    op.drop_table('pricings_recurring')
+    op.drop_table('pricings_individual_modular')
+    op.drop_table('pricings_flat_rate')
+    op.drop_table('pricings_collective_regular')
+    op.drop_table('pricings_collective_occasional')
     op.drop_table('invoices')
     op.drop_table('rooms')
+    op.drop_table('pricings')
     op.drop_table('clients')
     # ### end Alembic commands ###

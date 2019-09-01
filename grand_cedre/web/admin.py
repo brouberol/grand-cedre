@@ -8,7 +8,7 @@ from sqlalchemy import or_
 from . import app
 from .db import db
 
-from grand_cedre.models.booking import Booking
+from grand_cedre.models.booking import DailyBooking
 from grand_cedre.models.client import Client
 from grand_cedre.models.invoice import Invoice
 from grand_cedre.models.room import Room
@@ -17,6 +17,7 @@ from grand_cedre.models.contract import (
     FlatRateContract,
     ExchangeContract,
     OneShotContract,
+    RecurringContract,
 )
 from grand_cedre.models.pricing import (
     IndividualRoomModularPricing,
@@ -69,6 +70,7 @@ class ContractView(GrandCedreView):
         "hourly_rate": "Taux horaire",
         "total_hours": "Heures réservées",
         "remaining_hours": "Heures restantes",
+        "room_type": "Type de salle",
     }
     form_excluded_columns = ["type"]
     form_args = {"start_date": {"validators": [validate_start_end_dates]}}
@@ -83,47 +85,15 @@ class ContractView(GrandCedreView):
 class BookingView(GrandCedreView):
     column_labels = {
         "client": "Client",
-        "room": "Salle",
         "invoice": "Facture",
-        "start_datetime": "Date de début",
-        "end_datetime": "Date de fin",
-        "start_date": "Date",
-        "start_time": "Heure de début",
         "end_time": "Heure de fin",
         "calendar_link": "Lien",
         "price": "Prix",
         "frozen": "Consolidée",
     }
-    column_list = [
-        "client",
-        "room",
-        "start_date",
-        "start_time",
-        "end_time",
-        "calendar_link",
-        "price",
-    ]
-    column_filters = ["start_datetime", "end_datetime", "price"]
-    column_searchable_list = (
-        "client.first_name",
-        "client.last_name",
-        "room.name",
-        "start_datetime",
-    )
-    column_formatters = {
-        "calendar_link": (
-            lambda v, c, m, p: Markup(
-                f'<a href={m.calendar_link} target="_blank">📅</a>'
-            )
-        ),
-        "start_date": lambda v, c, m, p: (f"{m.start_datetime.date()}"),
-        "start_time": lambda v, c, m, p: (
-            f"{m._format_time(m.start_datetime.time(), sep=':')}"
-        ),
-        "end_time": lambda v, c, m, p: (
-            f"{m._format_time(m.end_datetime.time(), sep=':')}"
-        ),
-    }
+    column_list = ["client", "date", "price"]
+    column_filters = ["price"]
+    column_searchable_list = ("client.first_name", "client.last_name", "date")
 
 
 class InvoiceView(GrandCedreView):
@@ -259,7 +229,12 @@ admin.add_view(
 admin.add_view(
     ContractView(FlatRateContract, db.session, "Forfait", category="Contrats")
 )
-admin.add_view(BookingView(Booking, db.session, "Réservations"))
+admin.add_view(
+    ContractView(
+        RecurringContract, db.session, "Occupation récurente", category="Contrats"
+    )
+)
+admin.add_view(BookingView(DailyBooking, db.session, "Réservations"))
 admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
 admin.add_view(RoomView(Room, db.session, "Salles"))
 admin.add_view(
