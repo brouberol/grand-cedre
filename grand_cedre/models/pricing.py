@@ -27,10 +27,11 @@ class Pricing(Base):
         return {"polymorphic_identity": cls._type}
 
     def __str__(self):
-        return (
-            f"{self.type}: ] {self.duration_from}h -> {self.duration_to}h ] "
-            f"{self.hourly_price}e"
-        )
+        if self.duration_to:
+            interval = f"] {self.duration_from}h -> {self.duration_to}h ]"
+        else:
+            interval = f"] {self.duration_from}h -> + ]"
+        return f"{self.type}: {interval}: {self.hourly_price}e"
 
 
 class HourlyPricing:

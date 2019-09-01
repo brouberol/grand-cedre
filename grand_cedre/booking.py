@@ -93,7 +93,6 @@ class RoomBooking:
 
         self._creator = creator
 
-        logger.debug(f"Checking if there's an existing contract for client {creator}")
         contract = (
             session.query(Contract)
             .filter(Contract.client == self.creator)
