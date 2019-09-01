@@ -1,10 +1,14 @@
-from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
+import logging
+
+from decimal import Decimal
+
+from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey, event
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
 
-
 from grand_cedre.models import Base
 from grand_cedre.models.room import RoomType
+from grand_cedre.models.contract import FlatRateContract, ContractType
 
 
 class DailyBooking(Base):
@@ -44,3 +48,50 @@ class DailyBooking(Base):
             # raise error?
             pass
         return contracts[0]
+
+
+def _update_flat_rate_contract_remaining_hours(connection, booking, delete=True):
+    log = logging.getLogger("grand-cedre.models.booking")
+    remaining_hours = connection.execute(
+        (
+            f"SELECT remaining_hours FROM {FlatRateContract.__tablename__} "
+            f"WHERE id={booking.contract.id}"
+        )
+    ).first()[0]
+    if delete:
+        remaining_hours = Decimal(remaining_hours) + Decimal(booking.duration_hours)
+        log.info(
+            (
+                f"Updating {booking.client}'s flat rate contract to "
+                f"remaining_hours: {str(remaining_hours)}h after deletion "
+                f"of booking {booking}"
+            )
+        )
+    else:
+        remaining_hours = Decimal(remaining_hours) - Decimal(booking.duration_hours)
+        log.info(
+            (
+                f"Updating {booking.client}'s flat rate contract to "
+                f"remaining_hours: {str(remaining_hours)}h after creation "
+                f"of booking {booking}"
+            )
+        )
+    connection.execute(
+        (
+            f"UPDATE {FlatRateContract.__tablename__} "
+            f"SET remaining_hours={str(remaining_hours)} "
+            f"WHERE id={booking.contract.id}"
+        )
+    )
+
+
+@event.listens_for(DailyBooking, "before_delete")
+def before_booking_delete(mapper, connection, target):
+    if target.contract.type == ContractType.flat_rate:
+        _update_flat_rate_contract_remaining_hours(connection, target, delete=True)
+
+
+@event.listens_for(DailyBooking, "before_insert")
+def before_booking_insert(mapper, connection, target):
+    if target.contract.type == ContractType.flat_rate:
+        _update_flat_rate_contract_remaining_hours(connection, target, delete=False)
