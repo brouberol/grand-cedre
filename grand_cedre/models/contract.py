@@ -59,6 +59,13 @@ class Contract(PolymorphicBase):
     def __str__(self):
         return f"{str(self.client)}: {self.start_date}: {self.type}"
 
+    def ack_booking(self, booking_duration):
+        # What happens if we go under 0?
+        if self._type == ContractType.flat_rate:
+            self.remaining_hours = str(
+                Decimal(self.remaining_hours) - Decimal(booking_duration)
+            )
+
 
 class OneShotContract(Contract):
     """A contract allowing a client to book a room of a given type once"""
@@ -100,12 +107,6 @@ class FlatRateContract(Contract):
     end_date = Column(Date)
     total_hours = Column(String, nullable=False)
     remaining_hours = Column(String, nullable=False)
-
-    def ack_booking(self, booking_duration):
-        # What happens if we go under 0?
-        self.remaining_hours = str(
-            Decimal(self.remaining_hours) - Decimal(booking_duration)
-        )
 
 
 class RecurringContract(Contract):
