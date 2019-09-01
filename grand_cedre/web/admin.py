@@ -107,7 +107,7 @@ class ContractView(GrandCedreView):
     def format_room_type(v, c, m, p):
         if not m.room_type:
             return ""
-        elif not RoomType.get(m.room_type._name_):
+        elif m.room_type not in RoomType:
             return ""
         return f"{RoomType[m.room_type._name_]._value_}"
 
