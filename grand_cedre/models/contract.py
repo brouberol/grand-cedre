@@ -90,7 +90,7 @@ class ExchangeContract(Contract):
 class FlatRateContract(Contract):
     """A flat rate contract allows a client to pre-pay a given number of hours"""
 
-    __tablename__ = "flate_rate_contracts"
+    __tablename__ = "flat_rate_contracts"
     __mapper_args__ = {"polymorphic_identity": ContractType.flat_rate}
     _type = ContractType.flat_rate
     _nb_prepaid_hours = 40
