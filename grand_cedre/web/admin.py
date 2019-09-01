@@ -115,6 +115,7 @@ class ContractView(GrandCedreView):
     column_labels = {
         "client": "Client",
         "start_date": "Date de début",
+        "end_date": "Date de fin",
         "booking_price": "Prix par réservation",
         "hourly_rate": "Taux horaire",
         "total_hours": "Heures réservées",
