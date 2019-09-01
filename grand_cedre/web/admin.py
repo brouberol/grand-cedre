@@ -150,15 +150,26 @@ class BookingView(GrandCedreView):
         "duration_hours": "Durée (h)",
         "individual": "Salle individelle?",
         "room_type": "Type de salle",
+        "contract_type": "Type de contrat",
     }
-    column_list = ["room_type", "client", "date", "price"]
+    column_list = [
+        "contract_type",
+        "room_type",
+        "client",
+        "date",
+        "duration_hours",
+        "price",
+    ]
     column_filters = ["price"]
     column_searchable_list = ("client.first_name", "client.last_name", "date")
     form_excluded_columns = ("frozen", "invoice")
     column_formatters = {
         "room_type": (
             lambda v, c, m, p: f"{RoomType[m.contract.room_type._name_]._value_}"
-        )
+        ),
+        "contract_type": (
+            lambda v, c, m, p: f"{ContractTypeEnum[m.contract.type]._value_}"
+        ),
     }
 
 
