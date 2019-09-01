@@ -104,6 +104,13 @@ class ClientView(GrandCedreView):
 
 
 class ContractView(GrandCedreView):
+    def format_room_type(v, c, m, p):
+        if not m.room_type:
+            return ""
+        elif not RoomType.get(m.room_type._name_):
+            return ""
+        return f"{RoomType[m.room_type._name_]._value_}"
+
     column_searchable_list = ("client.first_name", "client.last_name")
     column_labels = {
         "client": "Client",
@@ -122,7 +129,7 @@ class ContractView(GrandCedreView):
         "room_type": {"model": RoomType},
     }
     column_formatters = {
-        "room_type": (lambda v, c, m, p: f"{RoomType[m.room_type._name_]._value_}"),
+        "room_type": format_room_type,
         "type": (lambda v, c, m, p: f"{ContractTypeEnum[m.type]._value_}"),
     }
 
