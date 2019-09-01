@@ -79,7 +79,7 @@ div#service_summary, tr#invoice_total {
 
 
 td.service_price:before {
-  content: "........................................";
+  content: "...................................................";
 }
 
 td.service_price, td#invoice_price {

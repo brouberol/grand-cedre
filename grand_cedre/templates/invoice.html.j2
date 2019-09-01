@@ -47,17 +47,15 @@
 
       <div id="service_details">
         <table>
-        {% for room, room_bookings_per_duration in invoice.bookings_per_room.items() %}
-        {% for duration, room_bookings in room_bookings_per_duration.items() %}
+        {% for booking in invoice.daily_bookings %}
           <tr>
             <td class="service_description">
-              {{ room.name }}: {{ room_bookings.duration_in_hours | replace(".0", "") }} heure{% if room_bookings.duration_in_hours > 1 %}s{% endif %}
+              {{ booking.date }} {% if booking.individual %}Cabinet{% else %}Salle collective{%endif%}: {{ booking.duration_hours | replace(".0", "") }} heure{% if booking.duration_hours | float > 1 %}s{% endif %}
             </td>
             <td class="service_price">
-              {{ room_bookings.count }} x {{ duration }}  = {{ room_bookings.price }} {{ invoice.symbol }}
+              {{ booking.price }} {{ invoice.symbol }}
             </td>
           </tr>
-        {% endfor %}
         {% endfor %}
           <tr id="invoice_total">
             <td>

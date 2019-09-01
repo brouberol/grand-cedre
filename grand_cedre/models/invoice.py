@@ -21,23 +21,6 @@ CURRENCIES = {"EURO": "EURO"}
 SYMBOLS = {"EURO": "€"}
 
 
-class RoomBookings(object):
-    def __init__(self, bookings):
-        self.bookings = bookings
-
-    @property
-    def price(self):
-        return sum([Decimal(booking.price) for booking in self.bookings])
-
-    @property
-    def duration_in_hours(self):
-        return sum([booking.duration_in_hour for booking in self.bookings])
-
-    @property
-    def count(self):
-        return len(self.bookings)
-
-
 class Invoice(Base):
 
     __tablename__ = "invoices"
@@ -71,17 +54,7 @@ class Invoice(Base):
     @property
     def number(self):
         shortened_year = self.period.split("-")[0][2:]
-        return f"GC {str(self.id).zfill(3)}-{shortened_year}"
-
-    @property
-    def bookings_per_room(self):
-        out = defaultdict(dict)
-        for booking in self.daily_bookings:
-            if booking.duration not in out[booking.room]:
-                out[booking.room][booking.duration] = RoomBookings([booking])
-            else:
-                out[booking.room][booking.duration].bookings.append(booking)
-        return out
+        return f"GC {str(self.id).zfill(3)}-{shortened_year}-A"
 
     @property
     def year(self):
