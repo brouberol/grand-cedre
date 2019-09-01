@@ -231,7 +231,7 @@ admin.add_view(
 )
 admin.add_view(
     ContractView(
-        RecurringContract, db.session, "Occupation récurente", category="Contrats"
+        RecurringContract, db.session, "Occupation récurrente", category="Contrats"
     )
 )
 admin.add_view(BookingView(DailyBooking, db.session, "Réservations"))
