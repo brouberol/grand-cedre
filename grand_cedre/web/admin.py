@@ -55,7 +55,7 @@ class ClientView(GrandCedreView):
         "city": "Ville",
         "phone_number": "Numéro de téléphone",
     }
-    form_excluded_columns = ["is_owner", "contracts", "bookings", "invoices"]
+    form_excluded_columns = ["is_owner", "contracts", "daily_bookings", "invoices"]
     form_args = {"email": {"validators": [Email()]}}
 
 
@@ -85,15 +85,15 @@ class ContractView(GrandCedreView):
 class BookingView(GrandCedreView):
     column_labels = {
         "client": "Client",
-        "invoice": "Facture",
-        "end_time": "Heure de fin",
-        "calendar_link": "Lien",
+        "date": "Date",
         "price": "Prix",
-        "frozen": "Consolidée",
+        "duration_hours": "Durée (h)",
+        "individual": "Salle individelle?",
     }
     column_list = ["client", "date", "price"]
     column_filters = ["price"]
     column_searchable_list = ("client.first_name", "client.last_name", "date")
+    form_excluded_columns = ("frozen", "invoice")
 
 
 class InvoiceView(GrandCedreView):
@@ -154,12 +154,14 @@ class PricingView(GrandCedreView):
 
     column_labels = {
         "valid_from": "Date d'instauration",
-        "valid_to": "Date de révision",
-        "duration": "Durée",
+        "valid_to": "Date de fin de validité",
         "hourly_price": "Prix à l'heure",
+        "duration_from": "Durée minimale (exclue)",
+        "duration_to": "Durée maximal (inclue)",
     }
     column_list = ["duration", "hourly_price", "valid_from", "valid_to"]
     column_formatters = {"duration": format_duration}
+    form_excluded_columns = ["type"]
 
 
 class RecurringPricingView(GrandCedreView):
@@ -168,12 +170,14 @@ class RecurringPricingView(GrandCedreView):
 
     column_labels = {
         "valid_from": "Date d'instauration",
-        "valid_to": "Date de révision",
-        "duration": "Durée",
+        "valid_to": "Date de fin de validité",
         "monthly_price": "Prix au mois",
+        "duration_from": "Durée minimale (exclue)",
+        "duration_to": "Durée maximal (inclue)",
     }
     column_list = ["duration", "monthly_price", "valid_from", "valid_to"]
     column_formatters = {"duration": format_duration}
+    form_excluded_columns = ["type"]
 
 
 class FlatRateView(GrandCedreView):
@@ -181,9 +185,12 @@ class FlatRateView(GrandCedreView):
         "flat_rate": "Prix à l'heure",
         "prepaid_hours": "Heures prépayées",
         "valid_from": "Date d'instauration",
-        "valid_to": "Date de révision",
+        "valid_to": "Date de fin de validité",
+        "duration_from": "Durée minimale (exclue)",
+        "duration_to": "Durée maximal (inclue)",
     }
     column_list = ["prepaid_hours", "flat_rate", "valid_from", "valid_to"]
+    form_excluded_columns = ["type"]
 
 
 class HomeAdminView(AdminIndexView):
