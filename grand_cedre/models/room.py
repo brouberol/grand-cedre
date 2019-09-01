@@ -4,6 +4,11 @@ from sqlalchemy.orm import relationship
 from grand_cedre.models import Base
 
 
+class RoomType:
+    individual = "individual"
+    collective = "collective"
+
+
 class Room(Base):
 
     __tablename__ = "rooms"

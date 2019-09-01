@@ -15,18 +15,23 @@ class RoomType(Enum):
     collective = 1
 
 
-# Several types of contract:
-# - standard: hourly rates apply
-# - recurrent: separate rates apply (ex: one whole day every week)
-# - exchange: no fees apply
-# - flat rate: clients pre-pay for a fixed number of hours,
-#   and then freely consume these hours
+class ContractType:
+    standard = "standard"
+    one_shot = "one_shot"
+    exchange = "exchange"
+    recurring = "recurring"
+    flat_rate = "flat_rate"
 
 
 class Contract(PolymorphicBase):
+    """
+    A standard contract for a given room type (individual or not),
+    allowing a client to book when they need.
+    """
+
     __tablename__ = "standard_contracts"
     __table_args__ = (UniqueConstraint("client_id", "start_date", "room_type"),)
-    _type = "standard"
+    _type = ContractType.standard
 
     id = Column(Integer, primary_key=True)
     client_id = Column(Integer, ForeignKey("clients.id"))
@@ -38,18 +43,18 @@ class Contract(PolymorphicBase):
 
     # This allows us to establish a polymorphic relationship between
     # client and contracts, as contracts can be of several types
-    __mapper_args__ = {"polymorphic_identity": "standard"}
+    __mapper_args__ = {"polymorphic_identity": ContractType.standard}
 
     def __str__(self):
         return f"{str(self.client)}: {self.start_date}: {self.type}"
 
 
 class OneShotContract(Contract):
-    """A recurrent contract apply special fees for recurrent bookings."""
+    """A contract allowing a client to book a room of a given type once"""
 
     __tablename__ = "one_shot_contracts"
-    __mapper_args__ = {"polymorphic_identity": "recurrent"}
-    _type = "one_shot"
+    __mapper_args__ = {"polymorphic_identity": ContractType.one_shot}
+    _type = ContractType.one_shot
 
     id = Column(Integer, ForeignKey("standard_contracts.id"), primary_key=True)
 
@@ -62,8 +67,8 @@ class ExchangeContract(Contract):
     """
 
     __tablename__ = "exchange_contracts"
-    __mapper_args__ = {"polymorphic_identity": "exchange"}
-    _type = "exchange"
+    __mapper_args__ = {"polymorphic_identity": ContractType.exchange}
+    _type = ContractType.exchange
 
     id = Column(Integer, ForeignKey("standard_contracts.id"), primary_key=True)
 
@@ -72,11 +77,11 @@ class ExchangeContract(Contract):
 
 
 class FlatRateContract(Contract):
-    """A flat rate contract allows a client to pre-pay 40 hours"""
+    """A flat rate contract allows a client to pre-pay a given number of hours"""
 
     __tablename__ = "flate_rate_contracts"
-    __mapper_args__ = {"polymorphic_identity": "flat_rate"}
-    _type = "flat_rate"
+    __mapper_args__ = {"polymorphic_identity": ContractType.flat_rate}
+    _type = ContractType.flat_rate
     _nb_prepaid_hours = 40
     _price = 360
 
@@ -93,10 +98,14 @@ class FlatRateContract(Contract):
 
 
 class RecurringContract(Contract):
-    """A recurring contract allows a client to regularly book rooms for preferential prices"""
+    """
+    A recurring contract allows a client to regularly book rooms
+    for preferential prices
+
+    """
 
     __tablename__ = "recurring_contracts"
-    __mapper_args__ = {"polymorphic_identity": "recurring"}
-    _type = "recurring"
+    __mapper_args__ = {"polymorphic_identity": ContractType.recurring}
+    _type = ContractType.recurring
 
     id = Column(Integer, ForeignKey("standard_contracts.id"), primary_key=True)

@@ -1,7 +1,6 @@
 from decimal import Decimal
 
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Date
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.ext.declarative import declared_attr
 
 from grand_cedre.models import Base

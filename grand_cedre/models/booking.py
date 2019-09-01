@@ -1,11 +1,10 @@
 from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.schema import UniqueConstraint
-from sqlalchemy import select, func
 
 
 from grand_cedre.models import Base
+from grand_cedre.models.room import RoomType
 
 
 class DailyBooking(Base):
@@ -32,11 +31,11 @@ class DailyBooking(Base):
 
     @property
     def contract(self):
-        individual_status = "individual" if self.individual else "collective"
+        room_type = RoomType.individual if self.individual else RoomType.collective
         contracts = [
             contract
             for contract in self.client.contracts
-            if contract.room_type.name == individual_status
+            if contract.room_type.name == room_type
         ]
         if not contracts:
             # raise error?

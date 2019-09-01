@@ -5,9 +5,10 @@ from collections import defaultdict
 from sqlalchemy import and_, or_
 from grand_cedre.utils import start_of_month, end_of_month
 from grand_cedre.service import get_service
-from grand_cedre.models.contract import Contract
+from grand_cedre.models.contract import Contract, ContractType
 from grand_cedre.models.client import Client
 from grand_cedre.models.booking import DailyBooking
+from grand_cedre.models.room import RoomType
 from grand_cedre.models.pricing import (
     IndividualRoomModularPricing,
     CollectiveRoomRegularPricing,
@@ -16,13 +17,13 @@ from grand_cedre.models.pricing import (
     RecurringPricing,
 )
 
-
+# Map the contract type and room type to a pricing model
 pricing_by_contract_and_room = {
-    ("standard", "individual"): IndividualRoomModularPricing,
-    ("standard", "collective"): CollectiveRoomRegularPricing,
-    ("one_shot", "collective"): CollectiveRoomOccasionalPricing,
-    ("flat_rate", "individual"): FlatRatePricing,
-    ("recurring", "individual"): RecurringPricing,
+    (ContractType.standard, RoomType.individual): IndividualRoomModularPricing,
+    (ContractType.standard, RoomType.collective): CollectiveRoomRegularPricing,
+    (ContractType.one_shot, RoomType.collective): CollectiveRoomOccasionalPricing,
+    (ContractType.flat_rate, RoomType.individual): FlatRatePricing,
+    (ContractType.recurring, RoomType.individual): RecurringPricing,
 }
 
 
@@ -77,10 +78,6 @@ class RoomBooking:
             individual=individual,
         )
 
-    def price_from_contract(self, contract):
-        if contract.type in ("standard", "recurrent", "exchange"):
-            return contract.get_booking_price()
-
     def resolve(self, session):
         creator = session.query(Client).filter_by(email=self.creator_email).first()
         if not creator:
@@ -103,6 +100,9 @@ class RoomBooking:
 
 
 def get_daily_booking_pricing(daily_booking, contract, individual_status, session):
+    """
+    Get the pricing that was applicable at the time of the booking
+    """
     pricing_model = pricing_by_contract_and_room[(contract.type, individual_status)]
     pricing = (
         session.query(pricing_model)
@@ -122,30 +122,43 @@ def get_daily_booking_pricing(daily_booking, contract, individual_status, sessio
 
 
 def insert_daily_bookings_in_db(daily_bookings_by_client, session):
+    # Iterate over daily booking grouped by clients
     for client, daily_bookings_by_date in daily_bookings_by_client.items():
+
+        # Iterate over the client daily bookings grouped by day
         for date, daily_bookings_by_room_type in daily_bookings_by_date.items():
-            for (
-                individual_status,
-                daily_bookings,
-            ) in daily_bookings_by_room_type.items():
-                individual = True if individual_status == "individual" else False
+
+            # Iterate over the client daily bookings grouped by room type
+            for (room_type, daily_bookings) in daily_bookings_by_room_type.items():
+
+                # Compute the total booking duration for the client/day/room_type
                 duration_hours = sum([booking.duration for booking in daily_bookings])
                 daily_booking = DailyBooking(
                     client=client,
                     duration_hours=duration_hours,
-                    individual=individual,
+                    individual=room_type == RoomType.individual,
                     date=daily_bookings[0].day,
                 )
+
+                # Fetch the client contract related to the daily booking
                 daily_booking_contract = daily_booking.contract
+
+                # Infer pricing from the contract type and room type
                 daily_booking_pricing = get_daily_booking_pricing(
-                    daily_booking, daily_booking_contract, individual_status, session
+                    daily_booking, daily_booking_contract, room_type, session
                 )
+
+                # Compute the price from the pricing type
                 daily_booking.price = str(
                     daily_booking_pricing.daily_booking_price(daily_booking)
                 )
-                if daily_booking_contract.type == "flat_rate":
+
+                # If we're dealing with a flat rate contract, retract consumed
+                # hours from the available credit
+                if daily_booking_contract.type == ContractType.flat_rate:
                     daily_booking_contract.add_booking(daily_booking)
                     session.add(daily_booking_contract)
+
                 session.add(daily_booking)
 
 
@@ -169,7 +182,10 @@ def import_monthly_bookings(calendars, session, year=None, month=None):
             .execute()
         )
         logging.info(
-            f"Fetching monthly bookings for calendar {calendar['summary']} from {start} to {end}"
+            (
+                f"Fetching monthly bookings for calendar {calendar['summary']} "
+                "from {start} to {end}"
+            )
         )
         for event in resp.get("items", []):
             booking = RoomBooking.from_event(event, calendar["metadata"]["individual"])
@@ -180,8 +196,10 @@ def import_monthly_bookings(calendars, session, year=None, month=None):
                     f"No contract was found for the creator of booking {booking}"
                 )
             else:
-                subsection = "individual" if booking.individual else "collective"
+                room_type = (
+                    RoomType.individual if booking.individual else RoomType.collective
+                )
                 daily_bookings_by_client[booking.creator][booking.day][
-                    subsection
+                    room_type
                 ].append(booking)
     insert_daily_bookings_in_db(daily_bookings_by_client, session)
