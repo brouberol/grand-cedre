@@ -21,9 +21,14 @@ def generate_invoice_per_contract(session, year=None, month=None):
             continue
         elif contract.client.missing_details():
             logging.warning(
-                f"Skipping invoice generation for contract {contract} as it's client is missing details"
+                (
+                    f"Skipping invoice generation for contract {contract} "
+                    "as its client is missing details"
+                )
             )
             continue
+        elif contract.type == ContractType.exchange:
+            logging.info("Skipping exchange contract invoice generation for {contract}")
         logging.info(f"Generating invoice for {contract} for period {start}->{end}")
         invoice, created = get_or_create(
             session,
