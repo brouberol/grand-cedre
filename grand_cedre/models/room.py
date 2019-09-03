@@ -1,18 +1,11 @@
 from sqlalchemy import Column, Integer, String, Boolean
-from sqlalchemy.orm import relationship
 
-from grand_cedre.models import Base
-
-
-class RoomType:
-    individual = "individual"
-    collective = "collective"
+from grand_cedre.models import GrandCedreBase
 
 
-class Room(Base):
+class Room(GrandCedreBase):
 
-    __tablename__ = "rooms"
-
+    __tablename__ = GrandCedreBase.get_table_name("Room")
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     individual = Column(Boolean)

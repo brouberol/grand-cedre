@@ -6,13 +6,12 @@ from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey, event
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
 
-from grand_cedre.models import Base
-from grand_cedre.models.room import RoomType
-from grand_cedre.models.contract import FlatRateContract, ContractType
+from grand_cedre.models import GrandCedreBase
+from grand_cedre.models.types import RoomType, ContractType
 
 
-class DailyBooking(Base):
-    __tablename__ = "daily_bookings"
+class DailyBooking(GrandCedreBase):
+    __tablename__ = GrandCedreBase.get_table_name("DailyBooking")
     __table_args__ = (UniqueConstraint("client_id", "date", "individual"),)
 
     id = Column(Integer, primary_key=True)
@@ -51,10 +50,11 @@ class DailyBooking(Base):
 
 
 def _update_flat_rate_contract_remaining_hours(connection, booking, delete=True):
+    contract_table = GrandCedreBase.get_table_name("Contract")
     log = logging.getLogger("grand-cedre.models.booking")
     remaining_hours = connection.execute(
         (
-            f"SELECT remaining_hours FROM {FlatRateContract.__tablename__} "
+            f"SELECT remaining_hours FROM {contract_table} "
             f"WHERE id={booking.contract.id}"
         )
     ).first()[0]
@@ -78,7 +78,7 @@ def _update_flat_rate_contract_remaining_hours(connection, booking, delete=True)
         )
     connection.execute(
         (
-            f"UPDATE {FlatRateContract.__tablename__} "
+            f"UPDATE {contract_table} "
             f"SET remaining_hours={str(remaining_hours)} "
             f"WHERE id={booking.contract.id}"
         )

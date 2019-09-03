@@ -2,92 +2,94 @@ from decimal import Decimal
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import ConcreteBase
 
-from grand_cedre.models import Base
+from grand_cedre.models import GrandCedreBase
 
 
-class Pricing(Base):
+class Pricing(GrandCedreBase):
+
+    __tablename__ = GrandCedreBase.get_table_name("Pricing")
+
     id = Column(Integer, primary_key=True)
-    type = Column(String(50), nullable=False)
+    type = Column(String(50), nullable=False, default="individual_modular")
     duration_from = Column(Integer, nullable=False)
     duration_to = Column(Integer, nullable=True)
     valid_from = Column(Date, nullable=False)
     valid_to = Column(Date, nullable=True)
-
-    @declared_attr
-    def __tablename__(cls):
-        if cls.__name__ == "Pricing":
-            return "pricings"
-        return "pricings_" + cls._type.lower()
-
-    @declared_attr
-    def __mapper_args__(cls):
-        if cls.__name__ == "Pricing":
-            return {"polymorphic_on": "type", "polymorphic_identity": "Pricing"}
-        return {"polymorphic_identity": cls._type}
-
-    def __str__(self):
-        if self.duration_to:
-            interval = f"] {self.duration_from}h -> {self.duration_to}h ]"
-        else:
-            interval = f"] {self.duration_from}h -> + ]"
-        return f"{self.type}: {interval}: {self.hourly_price}e"
-
-
-class HourlyPricing:
-    def daily_booking_price(self, daily_booking):
-        return (
-            Decimal(self.hourly_price) * Decimal(daily_booking.duration_hours)
-        ).quantize(Decimal("1.00"))
-
-
-class IndividualRoomModularPricing(HourlyPricing, Pricing):
-
-    _type = "individual_modular"
-
-    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
     hourly_price = Column(String(8), nullable=False)
 
 
-class CollectiveRoomRegularPricing(HourlyPricing, Pricing):
+# class HourlyPricing:
+#     def daily_booking_price(self, daily_booking):
+#         return (
+#             Decimal(self.hourly_price) * Decimal(daily_booking.duration_hours)
+#         ).quantize(Decimal("1.00"))
+# def __str__(self):
+#     if self.duration_to:
+#         interval = f"] {self.duration_from}h -> {self.duration_to}h ]"
+#     else:
+#         interval = f"] {self.duration_from}h -> + ]"
+#     return f"{self.type}: {interval}: {self.hourly_price}e"
 
-    _type = "collective_regular"
 
-    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
+class CollectiveRoomRegularPricing(GrandCedreBase):
+
+    __tablename__ = GrandCedreBase.get_table_name("CollectiveRoomRegularPricing")
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50), nullable=False, default="collective_regular")
+    duration_from = Column(Integer, nullable=False)
+    duration_to = Column(Integer, nullable=True)
+    valid_from = Column(Date, nullable=False)
+    valid_to = Column(Date, nullable=True)
     hourly_price = Column(String(8), nullable=False)
 
 
-class CollectiveRoomOccasionalPricing(HourlyPricing, Pricing):
+class CollectiveRoomOccasionalPricing(GrandCedreBase):
 
-    _type = "collective_occasional"
+    __tablename__ = GrandCedreBase.get_table_name("CollectiveRoomOccasionalPricing")
 
-    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50), nullable=False, default="collective_occasional")
+    duration_from = Column(Integer, nullable=False)
+    duration_to = Column(Integer, nullable=True)
+    valid_from = Column(Date, nullable=False)
+    valid_to = Column(Date, nullable=True)
     hourly_price = Column(String(8), nullable=False)
 
 
-class FlatRatePricing(Pricing):
+class FlatRatePricing(GrandCedreBase):
 
-    _type = "flat_rate"
+    __tablename__ = GrandCedreBase.get_table_name("FlatRatePricing")
 
-    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50), nullable=False, default="flat_rate")
+    valid_from = Column(Date, nullable=False)
+    valid_to = Column(Date, nullable=True)
     flat_rate = Column(String(8), nullable=False)
     prepaid_hours = Column(Integer, nullable=False)
 
+    contracts = relationship("Contract", back_populates="flat_rate_pricing")
+
     def __str__(self):
-        return (
-            f"{self.type}: ]{self.duration_from}h->{self.duration_to}h] "
-            f"{self.prepaid_hours}h - {self.flat_rate}e"
-        )
+        return f"{self.prepaid_hours}h - {self.flat_rate}e"
 
     def daily_booking_price(self, daily_booking):
         return Decimal("0.00")
 
 
-class RecurringPricing(Pricing):
+class RecurringPricing(GrandCedreBase):
 
-    _type = "recurring"
+    __tablename__ = GrandCedreBase.get_table_name("RecurringPricing")
 
-    id = Column(Integer, ForeignKey("pricings.id"), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50), nullable=False, default="recurring")
+    duration_from = Column(Integer, nullable=False)
+    duration_to = Column(Integer, nullable=True)
+    valid_from = Column(Date, nullable=False)
+    valid_to = Column(Date, nullable=True)
     monthly_price = Column(String(8), nullable=False)
 
     def __str__(self):
