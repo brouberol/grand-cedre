@@ -5,12 +5,12 @@ from collections import defaultdict
 from sqlalchemy import and_, or_
 from grand_cedre.utils import start_of_month, end_of_month, get_or_create
 from grand_cedre.service import get_service
-from grand_cedre.models.contract import Contract, ContractType
+from grand_cedre.models.contract import Contract
 from grand_cedre.models.client import Client
 from grand_cedre.models.booking import DailyBooking
-from grand_cedre.models.room import RoomType
+from grand_cedre.models.types import RoomType, ContractType
 from grand_cedre.models.pricing import (
-    IndividualRoomModularPricing,
+    Pricing,
     CollectiveRoomRegularPricing,
     CollectiveRoomOccasionalPricing,
     FlatRatePricing,
@@ -19,7 +19,7 @@ from grand_cedre.models.pricing import (
 
 # Map the contract type and room type to a pricing model
 pricing_by_contract_and_room = {
-    (ContractType.standard, RoomType.individual): IndividualRoomModularPricing,
+    (ContractType.standard, RoomType.individual): Pricing,
     (ContractType.standard, RoomType.collective): CollectiveRoomRegularPricing,
     (ContractType.one_shot, RoomType.collective): CollectiveRoomOccasionalPricing,
     (ContractType.flat_rate, RoomType.individual): FlatRatePricing,

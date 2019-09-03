@@ -11,7 +11,7 @@ from .db import db
 
 from grand_cedre.models.room import Room
 from grand_cedre.models.pricing import (
-    IndividualRoomModularPricing,
+    Pricing,
     CollectiveRoomRegularPricing,
     CollectiveRoomOccasionalPricing,
     FlatRatePricing,
@@ -107,17 +107,13 @@ def import_fixtures():
     insert_prices_from_file(
         CollectiveRoomOccasionalPricing, "collective_occasional_pricings.json"
     )
-    insert_prices_from_file(
-        IndividualRoomModularPricing, "individual_modular_pricings.json"
-    )
+    insert_prices_from_file(Pricing, "individual_modular_pricings.json")
     insert_prices_from_file(RecurringPricing, "individual_recurring_pricings.json")
 
     flat_rate_pricing, created = get_or_create(
         db.session,
         FlatRatePricing,
         defaults={"valid_from": date.today()},
-        duration_from=0,
-        duration_to=0,
         flat_rate="9.00",
         prepaid_hours=40,
     )

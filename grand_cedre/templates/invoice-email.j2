@@ -1,4 +1,4 @@
-Bonjour {{ invoice.client.first_name }},
+Bonjour {{ invoice.contract.client.first_name }},
 
 Tu trouveras attachée à ce mail ta facture de {{ invoice.period }} pour {% if invoice.bookings | length > 1 %}tes réservations{% else %}ta réservation{% endif %} au Grand Cèdre.
 

@@ -17,22 +17,15 @@ from grand_cedre.models.booking import DailyBooking
 from grand_cedre.models.client import Client
 from grand_cedre.models.invoice import Invoice
 from grand_cedre.models.room import Room
-from grand_cedre.models.contract import (
-    Contract,
-    FlatRateContract,
-    ExchangeContract,
-    OneShotContract,
-    RecurringContract,
-    RoomType,
-    ContractTypeEnum,
-)
+from grand_cedre.models.contract import Contract
 from grand_cedre.models.pricing import (
-    IndividualRoomModularPricing,
+    Pricing,
     CollectiveRoomRegularPricing,
     CollectiveRoomOccasionalPricing,
     FlatRatePricing,
     RecurringPricing,
 )
+from grand_cedre.models.types import RoomTypeEnum, ContractTypeEnum, ContractType
 
 
 class EnumField(Select2Field):
@@ -103,14 +96,22 @@ class ClientView(GrandCedreView):
     form_args = {"email": {"validators": [Email()]}}
 
 
-class ContractView(GrandCedreView):
+class _ContractView(GrandCedreView):
+    @classmethod
+    def get_type(cls):
+        return cls._type
+
+
+class ContractView(_ContractView):
     def format_room_type(v, c, m, p):
         if not m.room_type:
             return ""
-        elif m.room_type not in RoomType:
+        elif m.room_type not in RoomTypeEnum:
             return ""
-        return f"{RoomType[m.room_type._name_]._value_}"
+        return f"{RoomTypeEnum[m.room_type._name_]._value_}"
 
+    _type = ContractType.standard
+    can_delete = False
     column_searchable_list = ("client.first_name", "client.last_name")
     column_labels = {
         "client": "Client",
@@ -124,22 +125,71 @@ class ContractView(GrandCedreView):
         "type": "Type de contrat",
         "total_hours": "Heures prépayées",
         "remaining_hours": "Heures restantes",
+        "flat_rate_pricing": "Taux horaire",
     }
-    form_excluded_columns = ["type"]
-    form_args = {
-        "start_date": {"validators": [validate_start_end_dates], "default": date.today},
-        "room_type": {"model": RoomType},
-    }
+    column_list = ["type", "client", "room_type", "start_date"]
     column_formatters = {
         "room_type": format_room_type,
         "type": (lambda v, c, m, p: f"{ContractTypeEnum[m.type]._value_}"),
     }
+    form_excluded_columns = [
+        "type",
+        "invoices",
+        "total_hours",
+        "remaining_hours",
+        "flat_rate_pricing",
+        "end_date",
+    ]
+    form_args = {
+        "start_date": {"validators": [validate_start_end_dates], "default": date.today},
+        "room_type": {"model": RoomTypeEnum},
+        "type": {"default": _ContractView.get_type},
+    }
+
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            model.type = self.get_type()
 
     def get_query(self):
+        return self.session.query(self.model).filter(self.model.type == self._type)
 
-        return self.session.query(self.model).filter(
-            self.model.type == self.model._type
+
+class OneShotContractView(ContractView):
+    _type = ContractType.one_shot
+
+
+class ExchangeContractView(ContractView):
+    _type = ContractType.exchange
+
+
+class RecurringContractView(ContractView):
+    _type = ContractType.recurring
+
+
+class FlatRateContractView(ContractView):
+    _type = ContractType.flat_rate
+
+    column_list = [
+        "type",
+        "client",
+        "room_type",
+        "start_date",
+        "end_date",
+        "flat_rate_pricing",
+        "total_hours",
+        "remaining_hours",
+    ]
+    form_excluded_columns = ["type", "invoices", "flat_rate_pricing"]
+
+    def on_model_change(self, form, model, is_created):
+        super().on_model_change(form, model, is_created)
+        latest_flat_rate_pricing = (
+            db.session.query(FlatRatePricing)
+            .order_by(FlatRatePricing.id.desc())
+            .limit(1)
+            .first()
         )
+        model.flat_rate_pricing = latest_flat_rate_pricing
 
 
 class BookingView(GrandCedreView):
@@ -165,7 +215,7 @@ class BookingView(GrandCedreView):
     form_excluded_columns = ("frozen", "invoice")
     column_formatters = {
         "room_type": (
-            lambda v, c, m, p: f"{RoomType[m.contract.room_type._name_]._value_}"
+            lambda v, c, m, p: f"{RoomTypeEnum[m.contract.room_type._name_]._value_}"
         ),
         "contract_type": (
             lambda v, c, m, p: f"{ContractTypeEnum[m.contract.type]._value_}"
@@ -186,13 +236,16 @@ class InvoiceView(GrandCedreView):
             return Markup(f'<a href={model.to_mailto_link()} target="_blank">📧</a>')
         return ""
 
+    def render_price(view, context, model, p):
+        return f"{model.total_price}{model.symbol}"
+
     can_delete = False
-    column_searchable_list = ("client.first_name", "client.last_name")
+    column_searchable_list = ("contract.client.first_name", "contract.client.last_name")
     column_list = (
         "number",
         "client",
         Invoice.period,
-        "total_price",
+        "price",
         Invoice.issued_at,
         "download",
         "send",
@@ -201,7 +254,7 @@ class InvoiceView(GrandCedreView):
         "number": "# Facture",
         "client": "Client",
         "period": "Période",
-        "total_price": "Total",
+        "price": "Total",
         "issued_at": "Date d'édition",
         "download": "Télécharger",
         "currency": "Devise",
@@ -209,8 +262,8 @@ class InvoiceView(GrandCedreView):
         "daily_bookings": "Réservations",
     }
     column_formatters = {
-        "client": (lambda v, c, m, p: f"{m.client}"),
-        "total_price": (lambda v, c, m, p: f"{m.total_price}{m.symbol}"),
+        "client": (lambda v, c, m, p: f"{m.contract.client}"),
+        "price": render_price,
         "download": render_download_link,
         "send": render_send_link,
     }
@@ -305,19 +358,39 @@ admin = Admin(
 admin.add_view(ClientView(Client, db.session, "Clients"))
 admin.add_view(ContractView(Contract, db.session, "Standards", category="Contrats"))
 admin.add_view(
-    ContractView(
-        OneShotContract, db.session, "Réservations occasionelles", category="Contrats"
+    OneShotContractView(
+        Contract,
+        db.session,
+        "Réservations occasionelles",
+        category="Contrats",
+        endpoint="one_shot_contracts",
     )
 )
 admin.add_view(
-    ContractView(ExchangeContract, db.session, "Échanges", category="Contrats")
+    ExchangeContractView(
+        Contract,
+        db.session,
+        "Échanges",
+        category="Contrats",
+        endpoint="exchange_contracts",
+    )
 )
 admin.add_view(
-    ContractView(FlatRateContract, db.session, "Forfait", category="Contrats")
+    FlatRateContractView(
+        Contract,
+        db.session,
+        "Forfait",
+        category="Contrats",
+        endpoint="flat_rate_contracts",
+    )
 )
 admin.add_view(
-    ContractView(
-        RecurringContract, db.session, "Occupation récurrente", category="Contrats"
+    RecurringContractView(
+        Contract,
+        db.session,
+        "Occupation récurrente",
+        category="Contrats",
+        endpoint="recurring_contracts",
     )
 )
 admin.add_view(BookingView(DailyBooking, db.session, "Réservations"))
@@ -325,7 +398,7 @@ admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
 admin.add_view(RoomView(Room, db.session, "Salles"))
 admin.add_view(
     PricingView(
-        IndividualRoomModularPricing,
+        Pricing,
         db.session,
         "Salle individelle - Occupation modulaire",
         category="Tarifs",

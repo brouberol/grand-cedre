@@ -4,7 +4,7 @@
     <meta charset="utf-8">
 
     <link href="../static/invoice.css" rel="stylesheet" />
-    <title>Grand Cèdre - Facture {{ invoice.client.full_name }} - {{ locale_issue_date }}</title>
+    <title>Grand Cèdre - Facture {{ invoice.contract.client.full_name }} - {{ locale_issue_date }}</title>
     <meta name="description" content="Facture Grand Cèdre {{ locale_issue_date }}">
     <meta name="author" content="Clémentine Barthélémy">
   </head>
@@ -26,9 +26,9 @@
       </address>
 
       <address id="to">
-        {{ invoice.client.full_name }}
-        {{ invoice.client.address }}
-        {{ invoice.client.zip_code }} {{ invoice.client.city }}
+        {{ invoice.contract.client.full_name }}
+        {{ invoice.contract.client.address }}
+        {{ invoice.contract.client.zip_code }} {{ invoice.contract.client.city }}
       </address>
     </aside>
 
