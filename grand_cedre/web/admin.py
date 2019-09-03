@@ -5,7 +5,7 @@ from flask_admin.form.fields import Select2Field
 from flask_admin.model.form import converts
 from flask_admin.contrib.sqla.form import AdminModelConverter
 from markupsafe import Markup, escape
-from wtforms.validators import ValidationError, Email
+from wtforms.validators import ValidationError, Email, DataRequired
 from sqlalchemy import or_
 from datetime import date
 from sqlalchemy.sql.sqltypes import Enum as SQLEnum
@@ -41,7 +41,7 @@ class EnumField(Select2Field):
             else:
                 assert False
 
-        choices = [(v._name_, escape(v._value_)) for v in kwargs.pop("model")]
+        choices = [(v._name_, escape(v._value_)) for v in kwargs.pop("model", [])]
         super(EnumField, self).__init__(coerce=coercer, choices=choices, **kwargs)
 
     def pre_validate(self, form):
@@ -126,6 +126,7 @@ class ContractView(_ContractView):
         "total_hours": "Heures prépayées",
         "remaining_hours": "Heures restantes",
         "flat_rate_pricing": "Taux horaire",
+        "monthly_hours": "Nombre d'heures mensuelles",
     }
     column_list = ["type", "client", "room_type", "start_date"]
     column_formatters = {
@@ -138,12 +139,14 @@ class ContractView(_ContractView):
         "total_hours",
         "remaining_hours",
         "flat_rate_pricing",
+        "recurring_pricing",
         "end_date",
     ]
     form_args = {
         "start_date": {"validators": [validate_start_end_dates], "default": date.today},
         "room_type": {"model": RoomTypeEnum},
         "type": {"default": _ContractView.get_type},
+        "monthly_hours": {"validators": [DataRequired()]},
     }
 
     def on_model_change(self, form, model, is_created):
@@ -165,6 +168,41 @@ class ExchangeContractView(ContractView):
 class RecurringContractView(ContractView):
     _type = ContractType.recurring
 
+    column_list = [
+        "type",
+        "client",
+        "room_type",
+        "monthly_hours",
+        "start_date",
+        "end_date",
+    ]
+    form_excluded_columns = [
+        "type",
+        "invoices",
+        "end_date",
+        "flat_rate_pricing",
+        "recurring_pricing",
+        "total_hours",
+        "remaining_hours",
+    ]
+
+    def on_model_change(self, form, model, is_created):
+        super().on_model_change(form, model, is_created)
+        recurring_pricing = (
+            db.session.query(RecurringPricing)
+            .filter(RecurringPricing.duration_from < model.monthly_hours)
+            .filter(RecurringPricing.duration_to >= model.monthly_hours)
+            .filter(RecurringPricing.valid_from <= model.start_date)
+            .filter(
+                or_(
+                    RecurringPricing.valid_to >= date.today(),
+                    RecurringPricing.valid_to.is_(None),
+                )
+            )
+            .first()
+        )
+        model.recurring_pricing = recurring_pricing
+
 
 class FlatRateContractView(ContractView):
     _type = ContractType.flat_rate
@@ -179,7 +217,16 @@ class FlatRateContractView(ContractView):
         "total_hours",
         "remaining_hours",
     ]
-    form_excluded_columns = ["type", "invoices", "flat_rate_pricing"]
+    form_excluded_columns = [
+        "type",
+        "invoices",
+        "flat_rate_pricing",
+        "recurring_pricing",
+    ]
+    form_args = {
+        "total_hours": {"validators": [DataRequired()]},
+        "remaining_hours": {"validators": [DataRequired()]},
+    }
 
     def on_model_change(self, form, model, is_created):
         super().on_model_change(form, model, is_created)
@@ -243,6 +290,7 @@ class InvoiceView(GrandCedreView):
     column_searchable_list = ("contract.client.first_name", "contract.client.last_name")
     column_list = (
         "number",
+        "contract",
         "client",
         Invoice.period,
         "price",
@@ -260,6 +308,7 @@ class InvoiceView(GrandCedreView):
         "currency": "Devise",
         "send": "Envoyer",
         "daily_bookings": "Réservations",
+        "contract": "Contrats",
     }
     column_formatters = {
         "client": (lambda v, c, m, p: f"{m.contract.client}"),
@@ -268,6 +317,7 @@ class InvoiceView(GrandCedreView):
         "send": render_send_link,
     }
     form_args = {"issued_at": {"default": date.today}}
+    form_excluded_columns = ["period"]
 
 
 class RoomView(GrandCedreView):
@@ -297,9 +347,6 @@ class PricingView(GrandCedreView):
 
 
 class RecurringPricingView(GrandCedreView):
-    def format_duration(view, context, model, p):
-        return f"] {model.duration_from / 8}j, {model.duration_to / 8}j ]"
-
     column_labels = {
         "valid_from": "Date d'instauration",
         "valid_to": "Date de fin de validité",
@@ -308,7 +355,7 @@ class RecurringPricingView(GrandCedreView):
         "duration_to": "Durée maximal (inclue)",
     }
     column_list = ["duration", "monthly_price", "valid_from", "valid_to"]
-    column_formatters = {"duration": format_duration}
+    column_formatters = {"duration": (lambda v, c, m, p: f"{m.format_interval()}")}
     form_excluded_columns = ["type"]
 
 
