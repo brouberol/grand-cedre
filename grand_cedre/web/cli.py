@@ -17,7 +17,6 @@ from grand_cedre.models.pricing import (
     FlatRatePricing,
     RecurringPricing,
 )
-from grand_cedre.pricing import NoMatchingPrice
 from grand_cedre.invoice import generate_invoice_per_user
 from grand_cedre.booking import import_monthly_bookings
 from grand_cedre.utils import get_or_create
