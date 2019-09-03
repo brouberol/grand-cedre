@@ -1,14 +1,31 @@
 from decimal import Decimal
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
-from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy import Column, Integer, String, Date
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import ConcreteBase
 
 from grand_cedre.models import GrandCedreBase
 
 
-class Pricing(GrandCedreBase):
+class HourlyPricing:
+    def __str__(self):
+        if self.duration_to:
+            interval = f"] {self.duration_from}h -> {self.duration_to}h ]"
+        else:
+            interval = f"] {self.duration_from}h -> + ]"
+        return f"{self.type}: {interval}: {self.hourly_price}e"
+
+    def daily_booking_price(self, daily_booking):
+        return (
+            Decimal(self.hourly_price) * Decimal(daily_booking.duration_hours)
+        ).quantize(Decimal("1.00"))
+
+
+class FreePricing:
+    def daily_booking_price(self, daily_booking):
+        return Decimal("0.00")
+
+
+class Pricing(HourlyPricing, GrandCedreBase):
 
     __tablename__ = GrandCedreBase.get_table_name("Pricing")
 
@@ -21,20 +38,7 @@ class Pricing(GrandCedreBase):
     hourly_price = Column(String(8), nullable=False)
 
 
-# class HourlyPricing:
-#     def daily_booking_price(self, daily_booking):
-#         return (
-#             Decimal(self.hourly_price) * Decimal(daily_booking.duration_hours)
-#         ).quantize(Decimal("1.00"))
-# def __str__(self):
-#     if self.duration_to:
-#         interval = f"] {self.duration_from}h -> {self.duration_to}h ]"
-#     else:
-#         interval = f"] {self.duration_from}h -> + ]"
-#     return f"{self.type}: {interval}: {self.hourly_price}e"
-
-
-class CollectiveRoomRegularPricing(GrandCedreBase):
+class CollectiveRoomRegularPricing(HourlyPricing, GrandCedreBase):
 
     __tablename__ = GrandCedreBase.get_table_name("CollectiveRoomRegularPricing")
 
@@ -47,7 +51,7 @@ class CollectiveRoomRegularPricing(GrandCedreBase):
     hourly_price = Column(String(8), nullable=False)
 
 
-class CollectiveRoomOccasionalPricing(GrandCedreBase):
+class CollectiveRoomOccasionalPricing(HourlyPricing, GrandCedreBase):
 
     __tablename__ = GrandCedreBase.get_table_name("CollectiveRoomOccasionalPricing")
 
@@ -60,7 +64,7 @@ class CollectiveRoomOccasionalPricing(GrandCedreBase):
     hourly_price = Column(String(8), nullable=False)
 
 
-class FlatRatePricing(GrandCedreBase):
+class FlatRatePricing(FreePricing, GrandCedreBase):
 
     __tablename__ = GrandCedreBase.get_table_name("FlatRatePricing")
 
@@ -76,11 +80,8 @@ class FlatRatePricing(GrandCedreBase):
     def __str__(self):
         return f"{self.prepaid_hours}h - {self.flat_rate}e"
 
-    def daily_booking_price(self, daily_booking):
-        return Decimal("0.00")
 
-
-class RecurringPricing(GrandCedreBase):
+class RecurringPricing(FreePricing, GrandCedreBase):
 
     __tablename__ = GrandCedreBase.get_table_name("RecurringPricing")
 
@@ -97,6 +98,3 @@ class RecurringPricing(GrandCedreBase):
             f"{self.type}: ]{self.duration_from}d->{self.duration_to}d] "
             f"{self.monthly_price}e"
         )
-
-    def daily_booking_price(self, daily_booking):
-        return Decimal("0.00")
