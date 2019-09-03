@@ -54,6 +54,8 @@ class Invoice(GrandCedreBase):
             return Decimal(self.contract.flat_rate_pricing.flat_rate) * Decimal(
                 self.contract.flat_rate_pricing.prepaid_hours
             )
+        elif self.contract.type == ContractType.recurring:
+            return self.contract.recurring_pricing.monthly_price
         return sum([Decimal(booking.price) for booking in self.daily_bookings])
 
     @property

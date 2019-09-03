@@ -42,6 +42,8 @@
 
     {% if invoice.contract.type == "flat_rate" %}
     {% include "invoice_flat_rate_block.html.j2" %}
+    {% elif invoice.contract.type == "recurring" %}
+    {% include "invoice_recurring_block.html.j2" %}
     {% else %}
     {% include "invoice_service_block.html.j2" %}
     {% endif %}

@@ -1,13 +1,13 @@
 <div id="service">
   <div id="service_summary">
-    Forfait de {{ invoice.contract.total_hours }}h de réservation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet{% else %}de la salle collective{% endif %}, valable du {{ invoice.contract.start_date }} au {{ invoice.contract.end_date }}.
+    Réservation de {{ invoice.contract.monthly_hours }}h mensuelle {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet{% else %}de la salle collective{% endif %}, durant le mois de {{ locale_month }} {{ locale_year }}.
   </div>
 
   <div id="service_details">
     <table>
       <tr>
         <td class="service_description">
-          {{ invoice.contract.total_hours }} x {{ invoice.contract.flat_rate_pricing.flat_rate }} {{ invoice.symbol }}
+          1 x {{ invoice.contract.recurring_pricing.monthly_price }} {{ invoice.symbol }}
         </td>
         <td class="service_price">
           {{ invoice.total_price }} {{ invoice.symbol }}
