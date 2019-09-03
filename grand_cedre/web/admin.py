@@ -6,7 +6,7 @@ from flask_admin.model.form import converts
 from flask_admin.contrib.sqla.form import AdminModelConverter
 from markupsafe import Markup, escape
 from wtforms.validators import ValidationError, Email, DataRequired
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from datetime import date
 from sqlalchemy.sql.sqltypes import Enum as SQLEnum
 
@@ -100,6 +100,13 @@ class _ContractView(GrandCedreView):
     @classmethod
     def get_type(cls):
         return cls._type
+
+    def get_count_query(self):
+        return (
+            self.session.query(func.count("*"))
+            .select_from(self.model)
+            .filter_by(type=self.get_type())
+        )
 
 
 class ContractView(_ContractView):
