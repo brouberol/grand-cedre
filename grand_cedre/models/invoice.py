@@ -51,11 +51,13 @@ class Invoice(GrandCedreBase):
     @property
     def total_price(self):
         if self.contract.type == ContractType.flat_rate:
-            return Decimal(self.contract.flat_rate_pricing.flat_rate) * Decimal(
-                self.contract.flat_rate_pricing.prepaid_hours
-            )
+            if self.contract.flat_rate_pricing:
+                return Decimal(self.contract.flat_rate_pricing.flat_rate) * Decimal(
+                    self.contract.flat_rate_pricing.prepaid_hours
+                )
         elif self.contract.type == ContractType.recurring:
-            return self.contract.recurring_pricing.monthly_price
+            if self.contract.recurring_pricing is not None:
+                return self.contract.recurring_pricing.monthly_price
         return sum([Decimal(booking.price) for booking in self.daily_bookings])
 
     @property
@@ -73,7 +75,9 @@ class Invoice(GrandCedreBase):
 
     @property
     def is_valid(self):
-        return not self.contract.client.missing_details()
+        return (
+            not self.contract.client.missing_details() and self.total_price is not None
+        )
 
     @property
     def filename(self):
