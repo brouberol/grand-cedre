@@ -21,13 +21,20 @@ class Contract(GrandCedreBase):
     start_date = Column(Date)
     end_date = Column(Date, nullable=True)
     room_type = Column(SQLEnum(RoomTypeEnum))
-    pricing_id = Column(Integer, ForeignKey("pricings_flat_rate.id"))
+    pricing_id = Column(
+        Integer, ForeignKey(f"{GrandCedreBase.get_table_name('FlatRatePricing')}.id")
+    )
+    recurring_pricing_id = Column(
+        Integer, ForeignKey(f"{GrandCedreBase.get_table_name('RecurringPricing')}.id")
+    )
     total_hours = Column(String, nullable=True)
     remaining_hours = Column(String, nullable=True)
+    monthly_hours = Column(Integer, nullable=True)
 
     client = relationship("Client", back_populates="contracts")
     invoices = relationship("Invoice", back_populates="contract")
     flat_rate_pricing = relationship("FlatRatePricing", back_populates="contracts")
+    recurring_pricing = relationship("RecurringPricing", back_populates="contracts")
 
     def __str__(self):
         return f"{str(self.client)}: {self.start_date}: {self.type}:{self.room_type}"

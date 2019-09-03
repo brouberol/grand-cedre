@@ -92,6 +92,7 @@ class RecurringPricing(FreePricing, GrandCedreBase):
     valid_from = Column(Date, nullable=False)
     valid_to = Column(Date, nullable=True)
     monthly_price = Column(String(8), nullable=False)
+    contracts = relationship("Contract", back_populates="recurring_pricing")
 
     def __str__(self):
         return (
