@@ -321,6 +321,8 @@ class InvoiceView(GrandCedreView):
 
 
 class RoomView(GrandCedreView):
+    can_edit = False
+    can_delete = False
     column_labels = {
         "name": "Nom",
         "individual": "Individuelle?",
@@ -328,7 +330,12 @@ class RoomView(GrandCedreView):
     }
 
 
-class PricingView(GrandCedreView):
+class BasePricingView(GrandCedreView):
+    can_edit = False
+    can_delete = False
+
+
+class PricingView(BasePricingView):
     def format_duration(view, context, model, p):
         if model.duration_to is None:
             return f"]{model.duration_from},∞["
@@ -346,7 +353,7 @@ class PricingView(GrandCedreView):
     form_excluded_columns = ["type"]
 
 
-class RecurringPricingView(GrandCedreView):
+class RecurringPricingView(BasePricingView):
     column_labels = {
         "valid_from": "Date d'instauration",
         "valid_to": "Date de fin de validité",
@@ -359,7 +366,7 @@ class RecurringPricingView(GrandCedreView):
     form_excluded_columns = ["type"]
 
 
-class FlatRateView(GrandCedreView):
+class FlatRatePricingView(BasePricingView):
     column_labels = {
         "flat_rate": "Prix à l'heure",
         "prepaid_hours": "Heures prépayées",
@@ -490,4 +497,6 @@ admin.add_view(
         category="Tarifs",
     )
 )
-admin.add_view(FlatRateView(FlatRatePricing, db.session, "Forfait", category="Tarifs"))
+admin.add_view(
+    FlatRatePricingView(FlatRatePricing, db.session, "Forfait", category="Tarifs")
+)
