@@ -22,7 +22,7 @@ def download_invoice_as_pdf(invoice_id):
     invoice = db.session.query(Invoice).get(invoice_id)
     if not invoice:
         abort(404)
-    html = invoice.to_html()
+    html = invoice.to_html(app.jinja_env)
     with tempfile.NamedTemporaryFile(
         dir=output_dir, suffix=".html", mode="w"
     ) as tmphtml:

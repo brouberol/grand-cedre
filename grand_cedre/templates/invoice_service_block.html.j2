@@ -1,0 +1,28 @@
+<div id="service">
+  <div id="service_summary">
+    Mise à disposition de locaux équipés pour le mois {% if locale_month.startswith('a') %}d'{% else %}de {% endif %}{{ locale_month }} {{ locale_year }}
+  </div>
+
+  <div id="service_details">
+    <table>
+    {% for booking in invoice.daily_bookings %}
+      <tr>
+        <td class="service_description">
+          {{ booking.date }} {% if booking.individual %}Cabinet{% else %}Salle collective{%endif%}: {{ booking.duration_hours | replace(".0", "") }} heure{% if booking.duration_hours | float > 1 %}s{% endif %}
+        </td>
+        <td class="service_price">
+          {{ booking.price }} {{ invoice.symbol }}
+        </td>
+      </tr>
+    {% endfor %}
+      <tr id="invoice_total">
+        <td>
+          TOTAL
+        </td>
+        <td id="invoice_price">
+          {{ invoice.total_price }} {{ invoice.symbol }} TTC
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
