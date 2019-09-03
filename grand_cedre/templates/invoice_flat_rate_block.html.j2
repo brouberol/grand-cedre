@@ -1,6 +1,6 @@
 <div id="service">
   <div id="service_summary">
-    Forfait de {{ invoice.contract.total_hours }}h de réservation {% if invoice.contract.room_type == "individual" %}d'un cabinet{% else %}de la salle collective{% endif %}, valable du {{ invoice.contract.start_date }} au {{ invoice.contract.end_date }}.
+    Forfait de {{ invoice.contract.total_hours }}h de réservation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet{% else %}de la salle collective{% endif %}, valable du {{ invoice.contract.start_date }} au {{ invoice.contract.end_date }}.
   </div>
 
   <div id="service_details">
