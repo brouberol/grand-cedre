@@ -2,13 +2,11 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.types import Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
-from sqlalchemy.ext.declarative import ConcreteBase
-from decimal import Decimal
 
 from grand_cedre.models import GrandCedreBase
 from grand_cedre.models.client import Client
 
-from grand_cedre.models.types import ContractType, RoomTypeEnum
+from grand_cedre.models.types import RoomTypeEnum
 
 
 class Contract(GrandCedreBase):

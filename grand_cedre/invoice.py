@@ -38,21 +38,16 @@ def generate_invoice_per_contract(session, year=None, month=None):
             period=Invoice.format_period(),
             currency="EURO",
         )
-        if contract.type == ContractType.standard:
-            bookings = (
-                session.query(DailyBooking)
-                .filter(DailyBooking.client_id == contract.client.id)
-                .filter(and_(start <= DailyBooking.date, DailyBooking.date <= end))
-            ).all()
-            if bookings:
-
-                if created:
-                    for booking in bookings:
-                        booking.invoice = invoice
-                        booking.frozen = True
-                        session.add(booking)
-                    logging.info(
-                        f"Invoice for {invoice.total_price}{invoice.symbol} generated"
-                    )
-                else:
-                    logging.info(f"Invoice {invoice} already was generated")
+        bookings = (
+            session.query(DailyBooking)
+            .filter(DailyBooking.client_id == contract.client.id)
+            .filter(and_(start <= DailyBooking.date, DailyBooking.date <= end))
+        ).all()
+        if created:
+            for booking in bookings:
+                booking.invoice = invoice
+                booking.frozen = True
+                session.add(booking)
+            logging.info(f"Invoice for {invoice.total_price}{invoice.symbol} generated")
+        else:
+            logging.info(f"Invoice {invoice} already was generated")
