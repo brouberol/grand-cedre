@@ -3,7 +3,6 @@ import json
 import os
 
 from datetime import date
-from collections import defaultdict
 from decimal import Decimal
 
 from . import app
@@ -109,13 +108,17 @@ def import_fixtures():
     insert_prices_from_file(Pricing, "individual_modular_pricings.json")
     insert_prices_from_file(RecurringPricing, "individual_recurring_pricings.json")
 
-    flat_rate_pricing, created = get_or_create(
-        db.session,
-        FlatRatePricing,
-        defaults={"valid_from": date.today()},
-        flat_rate="9.00",
-        prepaid_hours=40,
-    )
+    with open(os.path.join(data_dir, "flat_rate_pricings.json")) as f:
+        prices = json.load(f)
+
+    for price in prices:
+        flat_rate_pricing, created = get_or_create(
+            db.session,
+            FlatRatePricing,
+            defaults={"valid_from": date.today()},
+            flat_rate=price["flat_rate"],
+            prepaid_hours=price["prepaid_hours"],
+        )
     if created:
         app.logger.info(
             f"Creating {flat_rate_pricing.__class__.__name__} {flat_rate_pricing}"
