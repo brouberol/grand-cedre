@@ -395,6 +395,20 @@ class HomeAdminView(AdminIndexView):
                     "ce qui bloquera la génération de facture"
                 )
             )
+
+        recurring_contracts_with_missing_details = (
+            db.session.query(Contract)
+            .filter(Contract.type == ContractType.recurring)
+            .filter(Contract.monthly_hours.is_(None))
+        ).all()
+        if recurring_contracts_with_missing_details:
+            warning_messages.append(
+                (
+                    "Certains contracts d'occupation récurrente n'ont pas d'heures "
+                    "mensuelles renseignéees, ce qui bloquera la génération "
+                    "de facture"
+                )
+            )
         return self.render("admin/home.html", warning_messages=warning_messages)
 
 
