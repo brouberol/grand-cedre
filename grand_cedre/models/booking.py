@@ -2,7 +2,7 @@ import logging
 
 from decimal import Decimal
 
-from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey, event
+from sqlalchemy import Column, Integer, String, Boolean, Date, event
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
 
@@ -15,8 +15,8 @@ class DailyBooking(GrandCedreBase):
     __table_args__ = (UniqueConstraint("client_id", "date", "individual"),)
 
     id = Column(Integer, primary_key=True)
-    client_id = Column(Integer, ForeignKey("clients.id"))
-    invoice_id = Column(Integer, ForeignKey("invoices.id"))
+    client_id = Column(Integer, GrandCedreBase.fk("Client"))
+    invoice_id = Column(Integer, GrandCedreBase.fk("Invoice"))
     date = Column(Date)
     duration_hours = Column(String)
     price = Column(String)

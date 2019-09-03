@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String, Date
 from sqlalchemy.orm import relationship
 
 from grand_cedre.models import GrandCedreBase
+from grand_cedre.models.types import PricingType
 
 
 class BasePricing:
@@ -39,7 +40,7 @@ class Pricing(HourlyPricing, GrandCedreBase):
     __tablename__ = GrandCedreBase.get_table_name("Pricing")
 
     id = Column(Integer, primary_key=True)
-    type = Column(String(50), nullable=False, default="individual_modular")
+    type = Column(String(50), nullable=False, default=PricingType.individual_modular)
     duration_from = Column(Integer, nullable=False)
     duration_to = Column(Integer, nullable=True)
     valid_from = Column(Date, nullable=False)
@@ -52,7 +53,7 @@ class CollectiveRoomRegularPricing(HourlyPricing, GrandCedreBase):
     __tablename__ = GrandCedreBase.get_table_name("CollectiveRoomRegularPricing")
 
     id = Column(Integer, primary_key=True)
-    type = Column(String(50), nullable=False, default="collective_regular")
+    type = Column(String(50), nullable=False, default=PricingType.collective_regular)
     duration_from = Column(Integer, nullable=False)
     duration_to = Column(Integer, nullable=True)
     valid_from = Column(Date, nullable=False)
@@ -65,7 +66,7 @@ class CollectiveRoomOccasionalPricing(HourlyPricing, GrandCedreBase):
     __tablename__ = GrandCedreBase.get_table_name("CollectiveRoomOccasionalPricing")
 
     id = Column(Integer, primary_key=True)
-    type = Column(String(50), nullable=False, default="collective_occasional")
+    type = Column(String(50), nullable=False, default=PricingType.collective_occasional)
     duration_from = Column(Integer, nullable=False)
     duration_to = Column(Integer, nullable=True)
     valid_from = Column(Date, nullable=False)
@@ -78,7 +79,7 @@ class FlatRatePricing(FreePricing, GrandCedreBase):
     __tablename__ = GrandCedreBase.get_table_name("FlatRatePricing")
 
     id = Column(Integer, primary_key=True)
-    type = Column(String(50), nullable=False, default="flat_rate")
+    type = Column(String(50), nullable=False, default=PricingType.flat_rate)
     valid_from = Column(Date, nullable=False)
     valid_to = Column(Date, nullable=True)
     flat_rate = Column(String(8), nullable=False)
@@ -95,7 +96,7 @@ class RecurringPricing(MonthlyPricing, FreePricing, GrandCedreBase):
     __tablename__ = GrandCedreBase.get_table_name("RecurringPricing")
 
     id = Column(Integer, primary_key=True)
-    type = Column(String(50), nullable=False, default="recurring")
+    type = Column(String(50), nullable=False, default=PricingType.recurring)
     duration_from = Column(Integer, nullable=False)
     duration_to = Column(Integer, nullable=True)
     valid_from = Column(Date, nullable=False)

@@ -28,3 +28,11 @@ class ContractTypeEnum(Enum):
     exchange = "Échange"
     recurring = "Occupation récurrente"
     flat_rate = "Forfait"
+
+
+class PricingType:
+    individual_modular = "individual_modular"
+    collective_regular = "collective_regular"
+    collective_occasional = "collective_occasional"
+    flat_rate = "flat_rate"
+    recurring = "recurring"

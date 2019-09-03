@@ -15,6 +15,7 @@ from grand_cedre.models.booking import DailyBooking
 from grand_cedre.models.types import ContractType
 from grand_cedre.models.contract import Contract
 
+
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 template_dir = os.path.join(parent_dir, "templates")
 
@@ -28,7 +29,7 @@ class Invoice(GrandCedreBase):
     __table_args__ = (UniqueConstraint("contract_id", "period"),)
 
     id = Column(Integer, primary_key=True)
-    contract_id = Column(Integer, ForeignKey("contracts.id"))
+    contract_id = Column(Integer, GrandCedreBase.fk("Contract"))
     period = Column(String)
     issued_at = Column(Date)
     currency = Column(String, default="EURO")
