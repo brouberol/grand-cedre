@@ -289,7 +289,7 @@ class PricingView(GrandCedreView):
         "valid_to": "Date de fin de validité",
         "hourly_price": "Prix à l'heure",
         "duration_from": "Durée minimale (exclue)",
-        "duration_to": "Durée maximal (inclue)",
+        "duration_to": "Durée maximale (inclue)",
     }
     column_list = ["duration", "hourly_price", "valid_from", "valid_to"]
     column_formatters = {"duration": format_duration}
