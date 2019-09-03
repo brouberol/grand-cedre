@@ -6,13 +6,17 @@ from sqlalchemy.orm import relationship
 from grand_cedre.models import GrandCedreBase
 
 
-class HourlyPricing:
-    def __str__(self):
+class BasePricing:
+    def format_interval(self):
         if self.duration_to:
-            interval = f"] {self.duration_from}h -> {self.duration_to}h ]"
+            return f"] {self.duration_from}h -> {self.duration_to}h ]"
         else:
-            interval = f"] {self.duration_from}h -> + ]"
-        return f"{self.type}: {interval}: {self.hourly_price}e"
+            return f"] {self.duration_from}h -> + ]"
+
+
+class HourlyPricing(BasePricing):
+    def __str__(self):
+        return f"{self.type}: {self.format_interval()}: {self.hourly_price}/h"
 
     def daily_booking_price(self, daily_booking):
         return (
@@ -20,7 +24,12 @@ class HourlyPricing:
         ).quantize(Decimal("1.00"))
 
 
-class FreePricing:
+class MonthlyPricing(BasePricing):
+    def __str__(self):
+        return f"{self.type}: {self.format_interval()}: {self.monthly_price}/mois"
+
+
+class FreePricing(BasePricing):
     def daily_booking_price(self, daily_booking):
         return Decimal("0.00")
 
@@ -81,7 +90,7 @@ class FlatRatePricing(FreePricing, GrandCedreBase):
         return f"{self.prepaid_hours}h - {self.flat_rate}e"
 
 
-class RecurringPricing(FreePricing, GrandCedreBase):
+class RecurringPricing(MonthlyPricing, FreePricing, GrandCedreBase):
 
     __tablename__ = GrandCedreBase.get_table_name("RecurringPricing")
 
@@ -92,10 +101,5 @@ class RecurringPricing(FreePricing, GrandCedreBase):
     valid_from = Column(Date, nullable=False)
     valid_to = Column(Date, nullable=True)
     monthly_price = Column(String(8), nullable=False)
-    contracts = relationship("Contract", back_populates="recurring_pricing")
 
-    def __str__(self):
-        return (
-            f"{self.type}: ]{self.duration_from}d->{self.duration_to}d] "
-            f"{self.monthly_price}e"
-        )
+    contracts = relationship("Contract", back_populates="recurring_pricing")
