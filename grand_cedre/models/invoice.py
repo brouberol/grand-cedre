@@ -6,12 +6,14 @@ from babel.dates import format_date
 from decimal import Decimal
 from urllib.parse import urlencode
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, event
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
 
 from grand_cedre.models import GrandCedreBase
 from grand_cedre.models.booking import DailyBooking
+from grand_cedre.models.types import ContractType
+from grand_cedre.models.contract import Contract
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 template_dir = os.path.join(parent_dir, "templates")
@@ -99,3 +101,18 @@ class Invoice(GrandCedreBase):
             params["body"] = template.render(invoice=self)
 
         return f"mailto:{self.contract.client.email}?{urlencode(params)}"
+
+
+@event.listens_for(Contract, "after_insert")
+def before_booking_delete(mapper, connection, target):
+    if target.type == ContractType.flat_rate:
+        period = (
+            f"{Invoice.format_period(target.start_date)}-"
+            f"{Invoice.format_period(target.end_date)}"
+        )
+        insert_invoice_q = f"""
+        INSERT INTO {Invoice.__tablename__}
+        (contract_id, period, issued_at, currency)
+        VALUES({target.id}, '{period}', '{datetime.date.today()}', 'EURO')
+        """
+        connection.execute(insert_invoice_q)
