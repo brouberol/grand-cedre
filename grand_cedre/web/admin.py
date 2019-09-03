@@ -411,7 +411,7 @@ class HomeAdminView(AdminIndexView):
         if recurring_contracts_with_missing_details:
             warning_messages.append(
                 (
-                    "Certains contracts d'occupation récurrente n'ont pas d'heures "
+                    "Certains contrats d'occupation récurrente n'ont pas d'heures "
                     "mensuelles renseignéees, ce qui bloquera la génération "
                     "de facture"
                 )
