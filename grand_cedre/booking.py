@@ -1,8 +1,10 @@
 import datetime
 import logging
 
+from decimal import Decimal
 from collections import defaultdict
 from sqlalchemy import and_, or_
+
 from grand_cedre.utils import start_of_month, end_of_month, get_or_create
 from grand_cedre.service import get_service
 from grand_cedre.models.contract import Contract
@@ -149,18 +151,19 @@ def insert_daily_bookings_in_db(daily_bookings_by_client, session):
                 logger.info(
                     f"Resolving bookings for {client}, {date}, room_type: {room_type}"
                 )
-                # Compute the total booking duration for the client/day/room_type
+                # Compute the total booking duration for the client/day/room_type and
+                # cast it from a float to a humanly readable decimal
                 duration_hours = sum([booking.duration for booking in daily_bookings])
-                daily_booking_kwargs = {
-                    "client": client,
-                    "duration_hours": duration_hours,
-                    "individual": room_type == RoomType.individual,
-                    "date": daily_bookings[0].day,
-                }
-                # Get or create the row in DB
+                duration_hours = Decimal(duration_hours).quantize(Decimal("1.00"))
 
+                # Get or create the row in DB
                 daily_booking, created = get_or_create(
-                    session, DailyBooking, **daily_booking_kwargs
+                    session,
+                    DailyBooking,
+                    client=client,
+                    duration_hours=duration_hours,
+                    individual=room_type == RoomType.individual,
+                    date=daily_bookings[0].day,
                 )
                 logger.info(f"Bookings: {daily_booking}")
 
