@@ -33,6 +33,9 @@ class Invoice(GrandCedreBase):
     period = Column(String)
     issued_at = Column(Date)
     currency = Column(String, default="EURO")
+    payed_at = Column(Date)
+    check_number = Column(String)
+    wire_transfer_number = Column(String)
 
     daily_bookings = relationship("DailyBooking", back_populates="invoice")
     contract = relationship("Contract", back_populates="invoices")

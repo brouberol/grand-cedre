@@ -1,5 +1,6 @@
-from flask import url_for
+from flask import url_for, flash
 from flask_admin import Admin, AdminIndexView, expose
+from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.form.fields import Select2Field
 from flask_admin.model.form import converts
@@ -69,6 +70,13 @@ def validate_start_end_dates(form, field):
             raise ValidationError(
                 "La date de début doit être antérieure à la date de fin"
             )
+
+
+def validate_check_or_wire_payment_method(form, field):
+    if form.check_number.data and form.wire_transfer_number.data:
+        raise ValidationError(
+            "Une facture ne peut pas être payée par chèque *et* virement"
+        )
 
 
 class GrandCedreView(ModelView):
@@ -293,6 +301,21 @@ class InvoiceView(GrandCedreView):
     def render_price(view, context, model, p):
         return f"{model.total_price}{model.symbol}"
 
+    @action(
+        "mark_as_payed",
+        "Marquer comme payées",
+        "Êtes vous sûr(e) de vouloir marquer ces factures comme payées?",
+    )
+    def action_mark_as_payed(self, ids):
+        today = date.today()
+        invoices = self.session.query(Invoice).filter(Invoice.id.in_(ids))
+        for invoice in invoices:
+            invoice.payed_at = today
+            self.session.add(invoice)
+
+        self.session.commit()
+        flash(f"Les factures ont été marquées comme payées le {today}")
+
     can_delete = False
     column_searchable_list = ("contract.client.first_name", "contract.client.last_name")
     column_list = (
@@ -302,6 +325,9 @@ class InvoiceView(GrandCedreView):
         Invoice.period,
         "price",
         Invoice.issued_at,
+        "payed_at",
+        "check_number",
+        "wire_transfer_number",
         "download",
         "send",
     )
@@ -316,6 +342,9 @@ class InvoiceView(GrandCedreView):
         "send": "Envoyer",
         "daily_bookings": "Réservations",
         "contract": "Contrats",
+        "payed_at": "Date d'encaissement",
+        "check_number": "# Chèque",
+        "wire_transfer_number": "# Virement",
     }
     column_formatters = {
         "client": (lambda v, c, m, p: f"{m.contract.client}"),
@@ -323,7 +352,11 @@ class InvoiceView(GrandCedreView):
         "download": render_download_link,
         "send": render_send_link,
     }
-    form_args = {"issued_at": {"default": date.today}}
+    form_args = {
+        "issued_at": {"default": date.today},
+        "check_number": {"validators": [validate_check_or_wire_payment_method]},
+        "wire_transfer_number": {"validators": [validate_check_or_wire_payment_method]},
+    }
     form_excluded_columns = ["period"]
 
 
