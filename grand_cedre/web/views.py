@@ -63,8 +63,8 @@ def download_balance_sheet_as_csv(balance_id):
             "# Chèque",
             "# Virement",
         ]
+        csvwriter.writerow(headers)
         for invoice in invoices:
-            csvwriter.writerow(headers)
             csvwriter.writerow(
                 [
                     invoice.number,
