@@ -27,6 +27,7 @@ from grand_cedre.models.pricing import (
     RecurringPricing,
 )
 from grand_cedre.models.types import RoomTypeEnum, ContractTypeEnum, ContractType
+from grand_cedre.models.balance import BalanceSheet
 
 
 class EnumField(Select2Field):
@@ -460,6 +461,21 @@ class HomeAdminView(AdminIndexView):
         return self.render("admin/home.html", warning_messages=warning_messages)
 
 
+class BalanceSheetView(GrandCedreView):
+    def render_download_link(view, context, model, p):
+        return Markup(
+            f"<a href={url_for('download_balance_sheet_as_csv', balance_id=model.id)}>💾</a>"
+        )
+
+    column_list = ["start_date", "end_date", "download_link"]
+    column_labels = {
+        "start_date": "Date de début",
+        "end_date": "Date de fin",
+        "download_link": "Télécharger",
+    }
+    column_formatters = {"download_link": render_download_link}
+
+
 admin = Admin(
     app, name="grand-cedre", template_mode="bootstrap3", index_view=HomeAdminView()
 )
@@ -504,6 +520,7 @@ admin.add_view(
 )
 admin.add_view(BookingView(DailyBooking, db.session, "Réservations"))
 admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
+admin.add_view(BalanceSheetView(BalanceSheet, db.session, "Bilans"))
 admin.add_view(RoomView(Room, db.session, "Salles"))
 admin.add_view(
     PricingView(

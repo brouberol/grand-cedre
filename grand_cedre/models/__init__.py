@@ -29,3 +29,4 @@ from grand_cedre.models.pricing import (
 )
 from grand_cedre.models.contract import Contract
 from .booking import DailyBooking
+from .balance import BalanceSheet
