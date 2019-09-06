@@ -156,6 +156,7 @@ class ContractView(_ContractView):
         "flat_rate_pricing",
         "recurring_pricing",
         "end_date",
+        "monthly_hours",
     ]
     form_args = {
         "start_date": {"validators": [validate_start_end_dates], "default": date.today},
