@@ -154,7 +154,7 @@ def insert_daily_bookings_in_db(daily_bookings_by_client, session):
                 # Compute the total booking duration for the client/day/room_type and
                 # cast it from a float to a humanly readable decimal
                 duration_hours = sum([booking.duration for booking in daily_bookings])
-                duration_hours = Decimal(duration_hours).quantize(Decimal("1.00"))
+                duration_hours = str(Decimal(duration_hours).quantize(Decimal("1.00")))
 
                 # Get or create the row in DB
                 daily_booking, created = get_or_create(
