@@ -8,7 +8,7 @@
     {% for booking in invoice.daily_bookings %}
       <tr>
         <td class="service_description">
-          {{ booking.date }} {% if booking.individual %}Cabinet{% else %}Salle collective{%endif%}: {{ booking.duration_hours | replace(".0", "") }} heure{% if booking.duration_hours | float > 1 %}s{% endif %}
+          {{ booking.date }} {% if booking.individual %}Cabinet{% else %}Salle collective{%endif%}: {{ booking.duration_hours | replace(".00", "") }} heure{% if booking.duration_hours | float > 1 %}s{% endif %}
         </td>
         <td class="service_price">
           {{ booking.price }} {{ invoice.symbol }}
