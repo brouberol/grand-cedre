@@ -2,7 +2,7 @@ import click
 import json
 import os
 
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from . import app
@@ -18,6 +18,7 @@ from grand_cedre.models.pricing import (
 )
 from grand_cedre.invoice import generate_invoice_per_contract
 from grand_cedre.booking import import_monthly_bookings
+from grand_cedre.balance import insert_last_month_balance_sheet_in_db
 from grand_cedre.utils import get_or_create
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -124,4 +125,17 @@ def import_fixtures():
             f"Creating {flat_rate_pricing.__class__.__name__} {flat_rate_pricing}"
         )
 
+    db.session.commit()
+
+
+@app.cli.command("create-balance-sheet")
+@click.option("--start-date")
+@click.option("--end-date")
+def create_last_month_balance_sheet(start_date, end_date):
+    """Create a balance sheet for the argument period (or last month)"""
+    start_date = (
+        datetime.strptime(start_date, "%Y-%m-%d").date() if start_date else None
+    )
+    end_date = datetime.strptime(end_date, "%Y-%m-%d").date() if end_date else None
+    insert_last_month_balance_sheet_in_db(db.session, start_date, end_date)
     db.session.commit()
