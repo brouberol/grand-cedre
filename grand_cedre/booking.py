@@ -6,7 +6,7 @@ from collections import defaultdict
 from sqlalchemy import and_, or_
 
 from grand_cedre.utils import start_of_month, end_of_month, get_or_create
-from grand_cedre.service import get_service
+from grand_cedre.service import get_calendar_service
 from grand_cedre.models.contract import Contract
 from grand_cedre.models.client import Client
 from grand_cedre.models.booking import DailyBooking
@@ -202,7 +202,7 @@ def import_monthly_bookings(calendars, session, year=None, month=None):
     daily_bookings_by_client = defaultdict(
         lambda: defaultdict(lambda: defaultdict(list))
     )
-    service = get_service()
+    service = get_calendar_service()
     start = start_of_month(year, month).isoformat() + "Z"
     end = end_of_month(year, month).isoformat() + "Z"
     for calendar in calendars:

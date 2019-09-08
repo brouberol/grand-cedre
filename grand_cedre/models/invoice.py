@@ -1,12 +1,13 @@
 import datetime
 import os
+import tempfile
 
 from jinja2 import Template
 from babel.dates import format_date
 from decimal import Decimal
 from urllib.parse import urlencode
-
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, event
+from weasyprint import HTML
+from sqlalchemy import Column, Integer, String, Date, event
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
 
@@ -18,6 +19,7 @@ from grand_cedre.models.contract import Contract
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 template_dir = os.path.join(parent_dir, "templates")
+output_dir = os.path.join(parent_dir, "output")
 
 CURRENCIES = {"EURO": "EURO"}
 SYMBOLS = {"EURO": "€"}
@@ -41,7 +43,7 @@ class Invoice(GrandCedreBase):
     contract = relationship("Contract", back_populates="invoices")
 
     def __str__(self):
-        return f"{self.client} {self.period}: {self.total_price}{self.symbol}"
+        return f"{self.contract.client.full_name} {self.period}: {self.total_price}{self.symbol}"
 
     @staticmethod
     def format_period(date=None):
@@ -102,6 +104,16 @@ class Invoice(GrandCedreBase):
             template = jinja_env.from_string(template_f.read())
             invoice_content = template.render(**template_variables)
         return invoice_content
+
+    def to_pdf(self, jinja_env, locale="fr_FR"):
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", suffix=".html", dir=output_dir
+        ) as f:
+            html = self.to_html(jinja_env, locale)
+            f.write(html)
+            f.flush()
+            pdf = HTML(f.name).write_pdf()
+        return pdf
 
     def to_mailto_link(self):
         params = {}
