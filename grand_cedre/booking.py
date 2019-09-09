@@ -1,5 +1,6 @@
 import datetime
 import logging
+import re
 
 from decimal import Decimal
 from collections import defaultdict
@@ -29,6 +30,9 @@ pricing_by_contract_and_room = {
 }
 
 logger = logging.getLogger("grand-cedre.booking")
+
+
+EMAIL_PATERN = r"[^@]+@[^@]+\.[^@]+"
 
 
 class NoContractFound(Exception):
@@ -69,10 +73,39 @@ class RoomBooking:
         return self._creator
 
     @classmethod
-    def from_event(cls, event, individual):
+    def from_event(cls, event, individual, session):
+        creator_email = event["creator"]["email"]
         if "dateTime" not in event["start"] or "dateTime" not in event["end"]:
             logger.info("Ignoring event spanning multiple days")
             return
+        elif "description" in event:
+            potential_email = event["description"].strip()
+            creator_client = session.query(Client).filter_by(email=creator_email).one()
+            if creator_client.is_owner:
+                m = re.match(EMAIL_PATERN, potential_email)
+                if m:
+                    logger.info(
+                        (
+                            f"Event creator is {creator_email} but the "
+                            f"real beneficiary is {m.group(0)}"
+                        )
+                    )
+                    creator_email = m.group(0)
+                else:
+                    logger.info(
+                        (
+                            "Ignoring event description as the format does "
+                            "not match an email afdress"
+                        )
+                    )
+            else:
+                logger.info(
+                    (
+                        f"Ignoring email {potential_email} in event description as "
+                        f"creator {creator_email} isn't associated with an owner client"
+                    )
+                )
+
         return cls(
             start=datetime.datetime.strptime(
                 event["start"]["dateTime"], "%Y-%m-%dT%H:%M:%S+%f:00"
@@ -80,7 +113,7 @@ class RoomBooking:
             end=datetime.datetime.strptime(
                 event["end"]["dateTime"], "%Y-%m-%dT%H:%M:%S+%f:00"
             ),
-            creator_email=event["creator"]["email"],
+            creator_email=creator_email,
             title=event["summary"],
             individual=individual,
         )
@@ -224,7 +257,9 @@ def import_monthly_bookings(calendars, session, year=None, month=None):
             )
         )
         for event in resp.get("items", []):
-            booking = RoomBooking.from_event(event, calendar["metadata"]["individual"])
+            booking = RoomBooking.from_event(
+                event, calendar["metadata"]["individual"], session
+            )
             if not booking:
                 continue
             try:
