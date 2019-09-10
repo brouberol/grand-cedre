@@ -5,6 +5,7 @@ tables = {
     "CollectiveRoomRegularPricing": "pricings_collective_regular",
     "Contract": "contracts",
     "DailyBooking": "daily_bookings",
+    "Expense": "expenses",
     "FlatRatePricing": "pricings_flat_rate",
     "Invoice": "invoices",
     "Pricing": "pricings_individual_modular",

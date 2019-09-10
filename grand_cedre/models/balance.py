@@ -1,11 +1,13 @@
 import csv
 
 from io import StringIO
+from decimal import Decimal
 from sqlalchemy import Column, Date, Integer
 from sqlalchemy.schema import UniqueConstraint
 
 from grand_cedre.models import GrandCedreBase
 from grand_cedre.models.invoice import Invoice
+from grand_cedre.models.expense import Expense
 
 
 class BalanceSheet(GrandCedreBase):
@@ -33,10 +35,10 @@ class BalanceSheet(GrandCedreBase):
             .filter(Invoice.payed_at >= self.start_date)
             .filter(Invoice.payed_at <= self.end_date)
         ).all()
-        total = str(sum([invoice.total_price for invoice in invoices]))
+        invoice_total = sum([invoice.total_price for invoice in invoices])
 
         csvwriter = csv.writer(csvfile)
-        headers = [
+        invoice_headers = [
             "# Facture",
             "Client",
             "Période",
@@ -45,7 +47,7 @@ class BalanceSheet(GrandCedreBase):
             "# Chèque",
             "# Virement",
         ]
-        csvwriter.writerow(headers)
+        csvwriter.writerow(invoice_headers)
         for invoice in invoices:
             csvwriter.writerow(
                 [
@@ -58,8 +60,30 @@ class BalanceSheet(GrandCedreBase):
                     invoice.wire_transfer_number or "",
                 ]
             )
-        csvwriter.writerow([] * len(headers))
-        csvwriter.writerow(["Total", total])
+
+        for i in range(2):
+            csvwriter.writerow([] * len(invoice_headers))
+
+        expense_headers = ["Dépense", "Date", "Montant"]
+        expenses = (
+            session.query(Expense)
+            .filter(Expense.date >= self.start_date)
+            .filter(Expense.date <= self.end_date)
+        ).all()
+        expense_total = sum([Decimal(expense.price) for expense in expenses]).quantize(
+            Decimal("1.00")
+        )
+
+        for expense in expenses:
+            csvwriter.writerow(expense_headers)
+            csvwriter.writerow([expense.label, expense.date, expense.price])
+
+        for i in range(2):
+            csvwriter.writerow([] * len(expense_headers))
+        csvwriter.writerow(["Total facturé", invoice_total])
+        csvwriter.writerow(["Total dépensé", expense_total])
+        csvwriter.writerow(["Total", str(invoice_total - expense_total)])
+
         csvfile.flush()
         csvfile.seek(0)
         return csvfile.read()

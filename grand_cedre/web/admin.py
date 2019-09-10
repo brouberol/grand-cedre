@@ -28,6 +28,7 @@ from grand_cedre.models.pricing import (
 )
 from grand_cedre.models.types import RoomTypeEnum, ContractTypeEnum, ContractType
 from grand_cedre.models.balance import BalanceSheet
+from grand_cedre.models.expense import Expense
 
 
 class EnumField(Select2Field):
@@ -145,7 +146,7 @@ class ContractView(_ContractView):
         "flat_rate_pricing": "Taux horaire",
         "monthly_hours": "Nombre d'heures mensuelles",
     }
-    column_list = ["type", "client", "room_type", "start_date"]
+    column_list = ["type", "client", "room_type", "start_date", "end_date"]
     column_formatters = {
         "room_type": format_room_type,
         "type": (lambda v, c, m, p: f"{ContractTypeEnum[m.type]._value_}"),
@@ -482,6 +483,11 @@ class BalanceSheetView(GrandCedreView):
     column_formatters = {"download_link": render_download_link}
 
 
+class ExpenseModel(GrandCedreView):
+    column_default_sort = ("date", True)
+    column_labels = {"date": "Date", "label": "Motif", "price": "Montant"}
+
+
 admin = Admin(
     app, name="grand-cedre", template_mode="bootstrap3", index_view=HomeAdminView()
 )
@@ -526,6 +532,7 @@ admin.add_view(
 )
 admin.add_view(BookingView(DailyBooking, db.session, "Réservations"))
 admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
+admin.add_view(ExpenseModel(Expense, db.session, "Dépenses"))
 admin.add_view(BalanceSheetView(BalanceSheet, db.session, "Bilans"))
 admin.add_view(RoomView(Room, db.session, "Salles"))
 admin.add_view(
