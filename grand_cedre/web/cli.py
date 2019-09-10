@@ -28,6 +28,11 @@ current_dir = os.path.abspath(os.path.dirname(__file__))
 data_dir = os.path.join(current_dir, "..", "..", "data")
 
 
+def parse_date(date_str):
+    if date_str:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+
+
 @app.cli.command("generate-invoices")
 @click.option("--year", type=int)
 @click.option("--month", type=int)
@@ -68,33 +73,39 @@ def import_bookings(year, month, pdb, no_commit):
 def insert_prices_from_file(model, filename):
     with open(os.path.join(data_dir, filename)) as f:
         pricings = json.load(f)
-    for interval, price in pricings.items():
-        duration_from, duration_to = interval.split("->")
-        today = date.today()
-        if model == RecurringPricing:
-            duration_to = int(Decimal(duration_to) * 8)
-            duration_from = int(Decimal(duration_from) * 8)
-            pricing, created = get_or_create(
-                db.session,
-                model,
-                defaults={"valid_from": today},
-                monthly_price=price,
-                duration_from=duration_from,
-                duration_to=duration_to,
-            )
-        else:
-            duration_to = int(duration_to) if duration_to else None
-            duration_from = int(duration_from)
-            pricing, created = get_or_create(
-                db.session,
-                model,
-                defaults={"valid_from": today},
-                hourly_price=price,
-                duration_from=duration_from,
-                duration_to=duration_to,
-            )
-        if created:
-            app.logger.info(f"Creating {pricing.__class__.__name__} {pricing}")
+    for pricing_data in pricings:
+        for interval, price in pricing_data["prices"].items():
+            duration_from, duration_to = interval.split("->")
+            if model == RecurringPricing:
+                duration_to = int(Decimal(duration_to) * 8)
+                duration_from = int(Decimal(duration_from) * 8)
+                pricing, created = get_or_create(
+                    db.session,
+                    model,
+                    defaults={
+                        "valid_from": parse_date(pricing_data["valid_from"]),
+                        "valid_to": parse_date(pricing_data["valid_to"]),
+                    },
+                    monthly_price=price,
+                    duration_from=duration_from,
+                    duration_to=duration_to,
+                )
+            else:
+                duration_to = int(duration_to) if duration_to else None
+                duration_from = int(duration_from)
+                pricing, created = get_or_create(
+                    db.session,
+                    model,
+                    defaults={
+                        "valid_from": parse_date(pricing_data["valid_from"]),
+                        "valid_to": parse_date(pricing_data["valid_to"]),
+                    },
+                    hourly_price=price,
+                    duration_from=duration_from,
+                    duration_to=duration_to,
+                )
+            if created:
+                app.logger.info(f"Creating {pricing.__class__.__name__} {pricing}")
 
 
 @app.cli.command("import-fixtures")
@@ -129,7 +140,10 @@ def import_fixtures():
         flat_rate_pricing, created = get_or_create(
             db.session,
             FlatRatePricing,
-            defaults={"valid_from": date.today()},
+            defaults={
+                "valid_from": parse_date(price["valid_from"]),
+                "valid_to": parse_date(price["valid_to"]),
+            },
             flat_rate=price["flat_rate"],
             prepaid_hours=price["prepaid_hours"],
         )
