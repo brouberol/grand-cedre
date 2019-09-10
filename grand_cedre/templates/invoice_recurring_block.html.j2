@@ -17,7 +17,7 @@
         <tr>
           <td>1</td>
           <td>
-            {{ invoice.contract.monthly_hours}}h mensuelle d'occupation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}
+            {{ invoice.contract.monthly_hours }}h mensuelle{% if invoice.contract.monthly_hours > 1 %}s{% endif %} d'occupation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}
           </td>
           <td>{{ invoice.contract.recurring_pricing.monthly_price }}</td>
           <td>{{ invoice.total_price }}</td>
