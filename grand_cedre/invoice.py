@@ -76,12 +76,12 @@ def generate_invoice_per_contract(
                     )
             with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
                 f.write(invoice.to_pdf(jinja_env))
-        ensure_drive_file(
-            local_filename=f.name,
-            remote_filename=invoice.filename,
-            description=f"Facture - {invoice.contract.client.full_name}",
-            mimetype="application/pdf",
-            parent_id=parent_id,
-            drive_service=drive_service,
-        )
-        os.unlink(f.name)
+            ensure_drive_file(
+                local_filename=f.name,
+                remote_filename=invoice.filename,
+                description=f"Facture - {invoice.contract.client.full_name}",
+                mimetype="application/pdf",
+                parent_id=parent_id,
+                drive_service=drive_service,
+            )
+            os.unlink(f.name)

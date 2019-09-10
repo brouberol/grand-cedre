@@ -239,10 +239,12 @@ class FlatRateContractView(ContractView):
         "invoices",
         "flat_rate_pricing",
         "recurring_pricing",
+        "monthly_hours",
     ]
     form_args = {
         "total_hours": {"validators": [DataRequired()]},
         "remaining_hours": {"validators": [DataRequired()]},
+        "room_type": {"model": RoomTypeEnum},
     }
 
     def on_model_change(self, form, model, is_created):
