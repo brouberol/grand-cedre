@@ -3,29 +3,35 @@
 @page {
   margin: 1cm;
   @bottom-right {
-    /*color: #a9a;*/
     font-family: Pacifico;
     font-size: 9pt; } }
 
 html {
   color: #14213d;
   font-family: Source Sans Pro;
-  font-size: 10pt;
+  font-size: 12pt;
   line-height: 1.6;
 }
 
 body {
-  margin: 10pt;
-}
-
-h1 {
-  font-size: 20pt;
-  margin-bottom: 0.5cm;
+  margin-left: 1.4cm;
+  margin-bottom: 1.4cm;
+  margin-left: 0.8cm;
+  margin-right: 0.8cm;
 }
 
 aside {
-    display: flex;
-    margin: 2em 0 4em;
+  display: flex;
+}
+
+div#invoice-title-date {
+  flex: 2;
+}
+
+h1#invoice_number {
+  text-align: right;
+  font-size: 18pt;
+  margin-bottom: 0.5cm;
 }
 
 aside address {
@@ -36,8 +42,31 @@ aside address {
 address#from {
   flex: 1;
 }
+
 address#to {
   text-align: right;
+}
+
+table {
+  width: 100%;
+}
+
+table, th, td  {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 0.5em;
+  text-align: center;
+}
+
+tbody tr:last-child td:first-child {
+  border-left: 0px solid white;
+}
+tbody tr:last-child td:nth-child(2) {
+  border-right: 0px solid white;
+}
+
+td#invoice_price {
+  border-left-color: white;
 }
 
 div#siret {
@@ -47,7 +76,7 @@ div#siret {
 
 footer {
   position: absolute;
-  bottom: 0px;
+  bottom: 0.2cm;
 }
 
 div#footer_address {
@@ -71,19 +100,12 @@ div#vat_mention {
 
 div#service {
   line-height: 2;
+  margin-top: 3em;
 }
 
 div#service_summary, tr#invoice_total {
   font-weight: bold;
-}
-
-
-td.service_price:before {
-  content: "...................................................";
-}
-
-td.service_price, td#invoice_price {
-  text-align: right;
+  margin-bottom: 1em;
 }
 
 div#service_total {

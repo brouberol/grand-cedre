@@ -1,28 +1,41 @@
 <div id="service">
   <div id="service_summary">
-    Mise à disposition de locaux équipés pour le mois {% if locale_month.startswith('a') %}d'{% else %}de {% endif %}{{ locale_month }} {{ locale_year }}
+    Intitulé: Mise à disposition de locaux équipés pour le mois {% if locale_month.startswith('a') %}d'{% else %}de {% endif %}{{ locale_month }} {{ locale_year }}
   </div>
 
   <div id="service_details">
     <table>
-    {% for booking in invoice.daily_bookings %}
-      <tr>
-        <td class="service_description">
-          {{ booking.date }} {% if booking.individual %}Cabinet{% else %}Salle collective{%endif%}: {{ booking.duration_hours | replace(".00", "") }} heure{% if booking.duration_hours | float > 1 %}s{% endif %}
-        </td>
-        <td class="service_price">
-          {{ booking.price }} {{ invoice.symbol }}
-        </td>
-      </tr>
-    {% endfor %}
-      <tr id="invoice_total">
-        <td>
-          TOTAL
-        </td>
-        <td id="invoice_price">
-          {{ invoice.total_price }} {{ invoice.symbol }} TTC
-        </td>
-      </tr>
+      <thead>
+        <tr>
+          <th>Durée</th>
+          <th>Désignation</th>
+          <th>Prix total TTC</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for booking in invoice.daily_bookings %}
+        <tr>
+          <td>
+            {{ booking.duration_hours | replace(".00", "") }} heure{% if booking.duration_hours | float > 1 %}s{% endif %}
+          </td>
+          <td>
+            {{ booking.date }} - {% if booking.individual %}Cabinet{% else %}Salle collective{% endif %}
+          </td>
+          <td>
+            {{ booking.price }}
+          </td>
+        </tr>
+        {% endfor %}
+        <tr id="invoice_total">
+          <td>
+            TOTAL
+          </td>
+          <td></td>
+          <td id="invoice_price">
+            {{ invoice.total_price }} {{ invoice.symbol }}
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
 </div>

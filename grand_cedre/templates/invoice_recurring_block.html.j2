@@ -1,26 +1,37 @@
 <div id="service">
   <div id="service_summary">
-    Réservation de {{ invoice.contract.monthly_hours }}h mensuelle {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet{% else %}de la salle collective{% endif %}, durant le mois de {{ locale_month }} {{ locale_year }}
+    Intitulé: Réservation de {{ invoice.contract.monthly_hours }}h mensuelle {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}, durant le mois de {{ locale_month }} {{ locale_year }}
   </div>
 
   <div id="service_details">
     <table>
-      <tr>
-        <td class="service_description">
-          1 x {{ invoice.contract.recurring_pricing.monthly_price }} {{ invoice.symbol }}
-        </td>
-        <td class="service_price">
-          {{ invoice.total_price }} {{ invoice.symbol }}
-        </td>
-      </tr>
-      <tr id="invoice_total">
-        <td>
-          TOTAL
-        </td>
-        <td id="invoice_price">
-          {{ invoice.total_price }} {{ invoice.symbol }} TTC
-        </td>
-      </tr>
+      <thead>
+        <tr>
+          <th>Quantité</th>
+          <th>Désignation</th>
+          <th>Prix unitaire</th>
+          <th>Prix total TTC</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>
+            {{ invoice.contract.monthly_hours}}h mensuelle d'occupation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}
+          </td>
+          <td>{{ invoice.contract.recurring_pricing.monthly_price }}</td>
+          <td>{{ invoice.total_price }}</td>
+        </tr>
+        <tr id="invoice_total">
+          <td>
+            TOTAL
+          </td>
+          <td colspan="2"></td>
+          <td id="invoice_price">
+            {{ invoice.total_price }} {{ invoice.symbol }}
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
 </div>

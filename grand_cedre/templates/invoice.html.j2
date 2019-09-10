@@ -10,35 +10,38 @@
   </head>
 
   <body>
-    <aside>
+    <aside id="invoice-details">
       <img src="../static/logo-small.jpg" />
+
+      <div id="invoice-title-date">
+        <h1 id="invoice_number">
+          FACTURE PROFORMA
+          N° {{ invoice.number }}
+        </h1>
+
+        <div id="invoice_date">
+          Chalon sur Saône, le {{ locale_issue_date }}
+        </div>
+      </div>
+    </aside>
+
+    <aside id="addresses">
       <address id="from">
+        <em>Emetteur:</em>
         Le Grand Cèdre
         Clémentine Barthélemy
         20 rue Carnot
         71100 Chalon sur Saône
-
-      <div id="siret">
-        Siret 42171292800033 APE 9604Z
-        Dispensé d'immatriculation au registre du commerce
-        et des sociétés RCS et au répertoire des métiers RM
-      </div>
+        03 85 94 08 52
       </address>
 
       <address id="to">
+        <em>Adressée à:</em>
         {{ invoice.contract.client.full_name }}
         {{ invoice.contract.client.address }}
         {{ invoice.contract.client.zip_code }} {{ invoice.contract.client.city }}
       </address>
     </aside>
-
-    <div id="invoice_date">
-      Chalon sur Saône, le {{ locale_issue_date }}
-    </div>
-
-    <h1 id="invoice_number">
-      FACTURE N°{{ invoice.number }}
-    </h1>
 
     {% if invoice.contract.type == "flat_rate" %}
     {% include "invoice_flat_rate_block.html.j2" %}

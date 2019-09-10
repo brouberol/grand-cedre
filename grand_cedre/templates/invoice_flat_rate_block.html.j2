@@ -1,26 +1,37 @@
 <div id="service">
   <div id="service_summary">
-    Forfait de {{ invoice.contract.total_hours }}h de réservation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet{% else %}de la salle collective{% endif %}, valable du {{ invoice.contract.start_date }} au {{ invoice.contract.end_date }}
+    Intitulé: Forfait de {{ invoice.contract.total_hours }}h de réservation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}, valable du {{ invoice.contract.start_date }} au {{ invoice.contract.end_date }}
   </div>
 
   <div id="service_details">
     <table>
-      <tr>
-        <td class="service_description">
-          {{ invoice.contract.total_hours }} x {{ invoice.contract.flat_rate_pricing.flat_rate }} {{ invoice.symbol }}
-        </td>
-        <td class="service_price">
-          {{ invoice.total_price }} {{ invoice.symbol }}
-        </td>
-      </tr>
-      <tr id="invoice_total">
-        <td>
-          TOTAL
-        </td>
-        <td id="invoice_price">
-          {{ invoice.total_price }} {{ invoice.symbol }} TTC
-        </td>
-      </tr>
+      <thead>
+        <tr>
+          <th>Quantité</th>
+          <th>Désignation</th>
+          <th>Prix unitaire</th>
+          <th>Prix total TTC</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ invoice.contract.total_hours }}</td>
+          <td>
+            1h d'occupation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}
+          </td>
+          <td>{{ invoice.contract.flat_rate_pricing.flat_rate }}</td>
+          <td>{{ invoice.total_price }}</td>
+        </tr>
+        <tr id="invoice_total">
+          <td>
+            TOTAL
+          </td>
+          <td colspan="2"></td>
+          <td id="invoice_price">
+            {{ invoice.total_price }} {{ invoice.symbol }}
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
 </div>
