@@ -262,6 +262,7 @@ class FlatRateContractView(ContractView):
 
 
 class BookingView(GrandCedreView):
+    column_default_sort = ("date", True)
     column_labels = {
         "client": "Client",
         "date": "Date",
