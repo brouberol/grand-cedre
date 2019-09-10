@@ -239,7 +239,6 @@ class FlatRateContractView(ContractView):
     form_excluded_columns = [
         "type",
         "invoices",
-        "flat_rate_pricing",
         "recurring_pricing",
         "weekly_hours",
         "room_type",
@@ -252,14 +251,7 @@ class FlatRateContractView(ContractView):
 
     def on_model_change(self, form, model, is_created):
         super().on_model_change(form, model, is_created)
-        latest_flat_rate_pricing = (
-            db.session.query(FlatRatePricing)
-            .order_by(FlatRatePricing.id.desc())
-            .limit(1)
-            .first()
-        )
         model.room_type = RoomTypeEnum.individual
-        model.flat_rate_pricing = latest_flat_rate_pricing
 
 
 class BookingView(GrandCedreView):
