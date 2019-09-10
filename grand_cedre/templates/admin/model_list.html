@@ -1,6 +1,6 @@
 {% extends 'admin/model/list.html' %}
 
 {% block body %}
-<h3>{{ admin_view.name }}</h3>
+<h3>{% if admin_view.category %}{{ admin_view.category }} - {% endif %}{{ admin_view.name }}</h3>
 {{ super() }}
 {% endblock %}
