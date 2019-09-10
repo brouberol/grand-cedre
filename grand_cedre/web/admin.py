@@ -91,7 +91,7 @@ class GrandCedreView(ModelView):
 class ClientView(GrandCedreView):
     can_delete = False
     column_exclude_list = ["is_owner"]
-    column_searchable_list = ("first_name", "last_name")
+    column_searchable_list = ("first_name", "last_name", "email")
     form_excluded_columns = ("contracts", "bookings", "invoices")
     column_filters = ["first_name", "last_name", "address", "city", "zip_code"]
     column_labels = {
