@@ -3,6 +3,7 @@ import logging
 import tempfile
 import os
 
+from datetime import date
 from sqlalchemy import and_
 from babel.dates import format_date
 
@@ -23,8 +24,11 @@ from grand_cedre.models.types import ContractType
 def generate_invoice_per_contract(
     session, upload, parent_id, jinja_env, year=None, month=None
 ):
-    start = start_of_month(year, month)
-    end = end_of_month(year, month)
+    current_year = date.today().year
+    previous_month = date.today().month - 1
+    start = start_of_month(year=current_year, month=previous_month).date()
+    end = end_of_month(year=current_year, month=previous_month).date()
+
     drive_service = get_drive_service()
     for i, contract in enumerate(session.query(Contract)):
         if contract.client.is_owner:

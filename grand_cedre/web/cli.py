@@ -36,8 +36,9 @@ def parse_date(date_str):
 @app.cli.command("generate-invoices")
 @click.option("--year", type=int)
 @click.option("--month", type=int)
+@click.option("--no-commit", is_flag=True)
 @click.option("--no-upload", is_flag=True)
-def generate_invoices(year, month, no_upload):
+def generate_invoices(year, month, no_commit, no_upload):
     """Generate invoices for the argument month/year period"""
     drive_data = json.load(open(os.path.join(data_dir, "drive.json")))
     parent_id = drive_data["base_folder"]["id"]
@@ -49,7 +50,8 @@ def generate_invoices(year, month, no_upload):
         parent_id=parent_id,
         jinja_env=app.jinja_env,
     )
-    db.session.commit()
+    if not no_commit:
+        db.session.commit()
 
 
 @app.cli.command("import-bookings")

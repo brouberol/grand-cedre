@@ -259,7 +259,7 @@ def import_monthly_bookings(calendars, session, year=None, month=None):
         logger.info(
             (
                 f"Fetching monthly bookings for calendar {calendar['summary']} "
-                "from {start} to {end}"
+                f"from {start} to {end}"
             )
         )
         for event in resp.get("items", []):
