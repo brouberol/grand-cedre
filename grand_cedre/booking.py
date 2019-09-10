@@ -18,6 +18,7 @@ from grand_cedre.models.pricing import (
     CollectiveRoomOccasionalPricing,
     FlatRatePricing,
     RecurringPricing,
+    FreePricing,
 )
 
 # Map the contract type and room type to a pricing model
@@ -27,6 +28,8 @@ pricing_by_contract_and_room = {
     (ContractType.one_shot, RoomType.collective): CollectiveRoomOccasionalPricing,
     (ContractType.flat_rate, RoomType.individual): FlatRatePricing,
     (ContractType.recurring, RoomType.individual): RecurringPricing,
+    (ContractType.exchange, RoomType.individual): FreePricing,
+    (ContractType.exchange, RoomType.collective): FreePricing,
 }
 
 logger = logging.getLogger("grand-cedre.booking")
