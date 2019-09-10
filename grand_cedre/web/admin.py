@@ -81,6 +81,7 @@ def validate_check_or_wire_payment_method(form, field):
 
 
 class GrandCedreView(ModelView):
+    list_template = "admin/model_list.html"
     model_form_converter = CustomAdminConverter
 
     def search_placeholder(self):
