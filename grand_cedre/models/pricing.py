@@ -17,7 +17,7 @@ class BasePricing:
 
 class HourlyPricing(BasePricing):
     def __str__(self):
-        return f"{self.type}: {self.format_interval()}: {self.hourly_price}/h"
+        return f"{self.type}: {self.format_interval()}: {self.hourly_price}€/h"
 
     def daily_booking_price(self, daily_booking):
         return (
@@ -27,7 +27,7 @@ class HourlyPricing(BasePricing):
 
 class MonthlyPricing(BasePricing):
     def __str__(self):
-        return f"{self.type}: {self.format_interval()}: {self.monthly_price}/mois"
+        return f"{self.type}: {self.format_interval()}: {self.monthly_price}€/mois"
 
 
 class FreePricing(BasePricing):
@@ -89,7 +89,7 @@ class FlatRatePricing(FreePricing, GrandCedreBase):
     contracts = relationship("Contract", back_populates="flat_rate_pricing")
 
     def __str__(self):
-        return f"{self.prepaid_hours}h - {self.flat_rate}e"
+        return f"{self.prepaid_hours}h - {self.flat_rate}€"
 
 
 class RecurringPricing(MonthlyPricing, FreePricing, GrandCedreBase):
