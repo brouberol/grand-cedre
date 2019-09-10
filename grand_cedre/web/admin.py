@@ -240,6 +240,7 @@ class FlatRateContractView(ContractView):
         "flat_rate_pricing",
         "recurring_pricing",
         "monthly_hours",
+        "room_type",
     ]
     form_args = {
         "total_hours": {"validators": [DataRequired()]},
@@ -255,6 +256,7 @@ class FlatRateContractView(ContractView):
             .limit(1)
             .first()
         )
+        model.room_type = RoomTypeEnum.individual
         model.flat_rate_pricing = latest_flat_rate_pricing
 
 
