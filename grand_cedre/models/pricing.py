@@ -31,7 +31,8 @@ class MonthlyPricing(BasePricing):
 
 
 class FreePricing(BasePricing):
-    def daily_booking_price(self, daily_booking):
+    @staticmethod
+    def daily_booking_price(daily_booking):
         return Decimal("0.00")
 
 
