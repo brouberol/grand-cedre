@@ -325,6 +325,7 @@ class InvoiceView(GrandCedreView):
         self.session.commit()
         flash(f"Les factures ont été marquées comme payées le {today}")
 
+    column_default_sort = (Invoice.issued_at, True)
     can_delete = False
     column_searchable_list = ("contract.client.first_name", "contract.client.last_name")
     column_list = (
