@@ -144,7 +144,7 @@ class ContractView(_ContractView):
         "total_hours": "Heures prépayées",
         "remaining_hours": "Heures restantes",
         "flat_rate_pricing": "Taux horaire",
-        "monthly_hours": "Nombre d'heures mensuelles",
+        "weekly_hours": "Nombre d'heures hebdomadaires",
     }
     column_list = ["type", "client", "room_type", "start_date", "end_date"]
     column_formatters = {
@@ -159,13 +159,13 @@ class ContractView(_ContractView):
         "flat_rate_pricing",
         "recurring_pricing",
         "end_date",
-        "monthly_hours",
+        "weekly_hours",
     ]
     form_args = {
         "start_date": {"validators": [validate_start_end_dates], "default": date.today},
         "room_type": {"model": RoomTypeEnum},
         "type": {"default": _ContractView.get_type},
-        "monthly_hours": {"validators": [DataRequired()]},
+        "weekly_hours": {"validators": [DataRequired()]},
     }
 
     def on_model_change(self, form, model, is_created):
@@ -191,7 +191,7 @@ class RecurringContractView(ContractView):
         "type",
         "client",
         "room_type",
-        "monthly_hours",
+        "weekly_hours",
         "start_date",
         "end_date",
     ]
@@ -209,8 +209,8 @@ class RecurringContractView(ContractView):
         super().on_model_change(form, model, is_created)
         recurring_pricing = (
             db.session.query(RecurringPricing)
-            .filter(RecurringPricing.duration_from < model.monthly_hours)
-            .filter(RecurringPricing.duration_to >= model.monthly_hours)
+            .filter(RecurringPricing.duration_from < model.weekly_hours)
+            .filter(RecurringPricing.duration_to >= model.weekly_hours)
             .filter(RecurringPricing.valid_from <= model.start_date)
             .filter(
                 or_(
@@ -241,7 +241,7 @@ class FlatRateContractView(ContractView):
         "invoices",
         "flat_rate_pricing",
         "recurring_pricing",
-        "monthly_hours",
+        "weekly_hours",
         "room_type",
     ]
     form_args = {
@@ -456,13 +456,13 @@ class HomeAdminView(AdminIndexView):
         recurring_contracts_with_missing_details = (
             db.session.query(Contract)
             .filter(Contract.type == ContractType.recurring)
-            .filter(Contract.monthly_hours.is_(None))
+            .filter(Contract.weekly_hours.is_(None))
         ).all()
         if recurring_contracts_with_missing_details:
             warning_messages.append(
                 (
                     "Certains contrats d'occupation récurrente n'ont pas d'heures "
-                    "mensuelles renseignéees, ce qui bloquera la génération "
+                    "hebdomadaires renseignéees, ce qui bloquera la génération "
                     "de facture"
                 )
             )

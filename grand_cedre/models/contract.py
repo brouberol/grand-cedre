@@ -22,7 +22,7 @@ class Contract(GrandCedreBase):
     recurring_pricing_id = Column(Integer, GrandCedreBase.fk("RecurringPricing"))
     total_hours = Column(String, nullable=True)
     remaining_hours = Column(String, nullable=True)
-    monthly_hours = Column(Integer, nullable=True)
+    weekly_hours = Column(Integer, nullable=True)
 
     client = relationship("Client", back_populates="contracts")
     invoices = relationship("Invoice", back_populates="contract")

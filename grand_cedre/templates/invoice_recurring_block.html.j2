@@ -1,6 +1,6 @@
 <div id="service">
   <div id="service_summary">
-    Intitulé: Réservation de {{ invoice.contract.monthly_hours }}h mensuelle {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}, durant le mois de {{ locale_month }} {{ locale_year }}
+    Intitulé: Réservation de {{ invoice.contract.weekly }}h hebdomadaires {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}, durant le mois de {{ locale_month }} {{ locale_year }}
   </div>
 
   <div id="service_details">
@@ -17,7 +17,7 @@
         <tr>
           <td>1</td>
           <td>
-            {{ invoice.contract.monthly_hours }}h mensuelle{% if invoice.contract.monthly_hours > 1 %}s{% endif %} d'occupation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}
+            {{ invoice.contract.weekly_hours }}h hebdomadaire{% if invoice.contract.weekly_hours > 1 %}s{% endif %} d'occupation {% if invoice.contract.room_type._name_ == "individual" %}d'un cabinet individuel{% else %}de la salle collective{% endif %}
           </td>
           <td>{{ invoice.contract.recurring_pricing.monthly_price }}</td>
           <td>{{ invoice.total_price }}</td>
