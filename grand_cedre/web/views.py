@@ -1,7 +1,5 @@
-import tempfile
 import os
 
-from weasyprint import HTML
 from flask import make_response, redirect, abort
 
 from . import app
