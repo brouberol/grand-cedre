@@ -70,9 +70,12 @@ class BalanceSheet(GrandCedreBase):
             .filter(Expense.date >= self.start_date)
             .filter(Expense.date <= self.end_date)
         ).all()
-        expense_total = sum([Decimal(expense.price) for expense in expenses]).quantize(
-            Decimal("1.00")
-        )
+        if expenses:
+            expense_total = sum(
+                [Decimal(expense.price) for expense in expenses]
+            ).quantize(Decimal("1.00"))
+        else:
+            expense_total = Decimal("0.00")
 
         for expense in expenses:
             csvwriter.writerow(expense_headers)
