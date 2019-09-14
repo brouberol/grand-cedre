@@ -77,8 +77,8 @@ class BalanceSheet(GrandCedreBase):
         else:
             expense_total = Decimal("0.00")
 
+        csvwriter.writerow(expense_headers)
         for expense in expenses:
-            csvwriter.writerow(expense_headers)
             csvwriter.writerow([expense.label, expense.date, expense.price])
 
         for i in range(2):
