@@ -480,6 +480,10 @@ class ExpenseModel(GrandCedreView):
     column_default_sort = ("date", True)
     column_labels = {"date": "Date", "label": "Motif", "price": "Montant"}
 
+    def on_model_change(self, form, model, is_created):
+        super().on_model_change(form, model, is_created)
+        model.price = model.price.replace(",", ".")
+
 
 admin = Admin(
     app, name="grand-cedre", template_mode="bootstrap3", index_view=HomeAdminView()
