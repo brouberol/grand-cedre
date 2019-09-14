@@ -1,3 +1,5 @@
+import re
+
 from flask import url_for, flash
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.actions import action
@@ -29,6 +31,9 @@ from grand_cedre.models.pricing import (
 from grand_cedre.models.types import RoomTypeEnum, ContractTypeEnum, ContractType
 from grand_cedre.models.balance import BalanceSheet
 from grand_cedre.models.expense import Expense
+
+
+PRICE_PATTERN = r"\d+[,.]\d+"
 
 
 class EnumField(Select2Field):
@@ -79,6 +84,11 @@ def validate_check_or_wire_payment_method(form, field):
         raise ValidationError(
             "Une facture ne peut pas être payée par chèque *et* virement"
         )
+
+
+def validate_price(form, field):
+    if not re.match(PRICE_PATTERN, form.price.data):
+        raise ValidationError("Le prix n'est pas correctement formaté")
 
 
 class GrandCedreView(ModelView):
@@ -479,6 +489,7 @@ class BalanceSheetView(GrandCedreView):
 class ExpenseModel(GrandCedreView):
     column_default_sort = ("date", True)
     column_labels = {"date": "Date", "label": "Motif", "price": "Montant"}
+    form_args = {"price": {"validators": [validate_price]}}
 
     def on_model_change(self, form, model, is_created):
         super().on_model_change(form, model, is_created)
