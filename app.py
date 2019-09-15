@@ -11,7 +11,7 @@ FIELD_PATTERN = re.compile(r"\{(\w+)\}\w")
 
 class GunicornJsonFormatter(JsonFormatter):
 
-    header_whitelist = ["host", "accept", "user_agent"]
+    header_whitelist = []
 
     def add_fields(self, log_record, record, message_dict):
         super().add_fields(log_record, record, message_dict)
