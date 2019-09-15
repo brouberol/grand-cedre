@@ -1,10 +1,9 @@
-import logging
-
 from decimal import Decimal
 
 from sqlalchemy import Column, Integer, String, Boolean, Date, event
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
+from grand_cedre.web.log import logger
 
 from grand_cedre.models import GrandCedreBase
 from grand_cedre.models.types import RoomType, ContractType
@@ -51,7 +50,6 @@ class DailyBooking(GrandCedreBase):
 
 def _update_flat_rate_contract_remaining_hours(connection, booking, delete=True):
     contract_table = GrandCedreBase.get_table_name("Contract")
-    log = logging.getLogger("grand-cedre.models.booking")
     remaining_hours = connection.execute(
         (
             f"SELECT remaining_hours FROM {contract_table} "
@@ -60,7 +58,7 @@ def _update_flat_rate_contract_remaining_hours(connection, booking, delete=True)
     ).first()[0]
     if delete:
         remaining_hours = Decimal(remaining_hours) + Decimal(booking.duration_hours)
-        log.info(
+        logger.info(
             (
                 f"Updating {booking.client}'s flat rate contract to "
                 f"remaining_hours: {str(remaining_hours)}h after deletion "
@@ -69,7 +67,7 @@ def _update_flat_rate_contract_remaining_hours(connection, booking, delete=True)
         )
     else:
         remaining_hours = Decimal(remaining_hours) - Decimal(booking.duration_hours)
-        log.info(
+        logger.info(
             (
                 f"Updating {booking.client}'s flat rate contract to "
                 f"remaining_hours: {str(remaining_hours)}h after creation "

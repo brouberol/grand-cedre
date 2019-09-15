@@ -1,5 +1,4 @@
 import datetime
-import logging
 import tempfile
 import os
 
@@ -19,6 +18,7 @@ from grand_cedre.models.contract import Contract
 from grand_cedre.models.booking import DailyBooking
 from grand_cedre.models.invoice import Invoice
 from grand_cedre.models.types import ContractType
+from grand_cedre.web.log import logger
 
 
 def generate_invoice_per_contract(
@@ -32,12 +32,12 @@ def generate_invoice_per_contract(
     drive_service = get_drive_service()
     for i, contract in enumerate(session.query(Contract)):
         if contract.client.is_owner:
-            logging.info(
+            logger.info(
                 "Skipping invoice generation for {contract} as client is the owner"
             )
             continue
         elif contract.client.missing_details():
-            logging.warning(
+            logger.warning(
                 (
                     f"Skipping invoice generation for contract {contract} "
                     "as its client is missing details"
@@ -45,8 +45,8 @@ def generate_invoice_per_contract(
             )
             continue
         elif contract.type == ContractType.exchange:
-            logging.info("Skipping exchange contract invoice generation for {contract}")
-        logging.info(f"Generating invoice for {contract} for period {start}->{end}")
+            logger.info("Skipping exchange contract invoice generation for {contract}")
+        logger.info(f"Generating invoice for {contract} for period {start}->{end}")
         invoice, created = get_or_create(
             session,
             Invoice,
@@ -65,9 +65,9 @@ def generate_invoice_per_contract(
                 booking.invoice = invoice
                 booking.frozen = True
                 session.add(booking)
-            logging.info(f"Invoice for {invoice.total_price}{invoice.symbol} generated")
+            logger.info(f"Invoice for {invoice.total_price}{invoice.symbol} generated")
         else:
-            logging.info(f"Invoice {invoice} already was generated")
+            logger.info(f"Invoice {invoice} already was generated")
 
         if upload:
             if i == 0:

@@ -1,11 +1,11 @@
 import datetime
-import logging
 import re
 
 from decimal import Decimal
 from collections import defaultdict
 from sqlalchemy import and_, or_
 
+from grand_cedre.web.log import logger
 from grand_cedre.utils import start_of_month, end_of_month, get_or_create
 from grand_cedre.service import get_calendar_service
 from grand_cedre.models.contract import Contract
@@ -31,8 +31,6 @@ pricing_by_contract_and_room = {
     (ContractType.exchange, RoomType.individual): FreePricing,
     (ContractType.exchange, RoomType.collective): FreePricing,
 }
-
-logger = logging.getLogger("grand-cedre.booking")
 
 
 EMAIL_PATERN = r"[^@]+@[^@]+\.[^@]+"

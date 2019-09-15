@@ -1,5 +1,4 @@
 import tempfile
-import logging
 
 from datetime import date
 from babel.dates import format_date
@@ -13,8 +12,7 @@ from grand_cedre.utils import (
 )
 from grand_cedre.service import get_drive_service
 from grand_cedre.models.balance import BalanceSheet
-
-logger = logging.getLogger("grand-cedre.balance")
+from grand_cedre.web.log import logger
 
 
 def insert_last_month_balance_sheet_in_db(session, start_date=None, end_date=None):

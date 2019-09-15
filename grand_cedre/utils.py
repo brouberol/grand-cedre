@@ -1,9 +1,9 @@
 import datetime
 import calendar
-import logging
 import googleapiclient.http
+import logging
 
-logger = logging.getLogger("grand-cedre.utils")
+logger = logging.getLogger("grand-cedre")
 
 
 def utcnow():
