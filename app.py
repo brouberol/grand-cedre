@@ -38,7 +38,7 @@ class GunicornJsonFormatter(JsonFormatter):
                     plain_fieldname = fieldname.replace("http_", "")
                     if plain_fieldname in self.header_whitelist:
                         log_record["request"][fieldname] = log_record["request"].pop(
-                            fieldname
+                            plain_fieldname
                         )
                     else:
                         log_record["request"].pop(fieldname, None)
