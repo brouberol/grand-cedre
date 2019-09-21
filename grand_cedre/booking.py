@@ -194,15 +194,19 @@ def insert_daily_bookings_in_db(daily_bookings_by_client, session):
                 duration_hours = str(Decimal(duration_hours).quantize(Decimal("1.00")))
 
                 # Get or create the row in DB
+                # Note: as we'll run the import job regularly, and that the booking duration
+                # may vary, we can adjust the duration even if the row already exists in DB
                 daily_booking, created = get_or_create(
                     session,
                     DailyBooking,
                     client=client,
-                    duration_hours=duration_hours,
                     individual=room_type == RoomType.individual,
                     date=daily_bookings[0].day,
                 )
-                logger.info(f"Bookings: {daily_booking}")
+                logger.info(f"Booking: {daily_booking}")
+
+                if not created and daily_booking.duration_hours != duration_hours:
+                    logger.info(f"Updating the booking duration to {duration_hours}")
 
                 # Fetch the client contract related to the daily booking
                 daily_booking_contract = daily_booking.contract
