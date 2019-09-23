@@ -202,6 +202,7 @@ def insert_daily_bookings_in_db(daily_bookings_by_client, session):
                     client=client,
                     individual=room_type == RoomType.individual,
                     date=daily_bookings[0].day,
+                    defaults={'duration_hours': duration_hours}
                 )
                 logger.info(f"Booking: {daily_booking}")
 
