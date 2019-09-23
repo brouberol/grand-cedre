@@ -207,6 +207,7 @@ def insert_daily_bookings_in_db(daily_bookings_by_client, session):
 
                 if not created and daily_booking.duration_hours != duration_hours:
                     logger.info(f"Updating the booking duration to {duration_hours}")
+                    daily_booking.duration_hours = duration_hours
 
                 # Fetch the client contract related to the daily booking
                 daily_booking_contract = daily_booking.contract
