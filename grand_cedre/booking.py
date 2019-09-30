@@ -75,6 +75,7 @@ class RoomBooking:
 
     @classmethod
     def from_event(cls, event, individual, session):
+        logger.debug(event)
         creator_email = event["creator"]["email"]
         if "dateTime" not in event["start"] or "dateTime" not in event["end"]:
             logger.info("Ignoring event spanning multiple days")
