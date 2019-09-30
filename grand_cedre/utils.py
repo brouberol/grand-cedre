@@ -2,8 +2,16 @@ import datetime
 import calendar
 import googleapiclient.http
 import logging
+import tempfile
+import shutil
 
 logger = logging.getLogger("grand-cedre")
+
+
+def create_temporary_copy(path):
+    _, temp_path = tempfile.mkstemp()
+    shutil.copy2(path, temp_path)
+    return temp_path
 
 
 def utcnow():

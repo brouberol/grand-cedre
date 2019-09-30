@@ -138,6 +138,13 @@ class ContractView(_ContractView):
             return ""
         return f"{RoomTypeEnum[m.room_type._name_]._value_}"
 
+    def render_download_link(view, context, model, p):
+        if not model.client.missing_details():
+            return Markup(
+                f"<a href={url_for('download_contract_as_odt', contract_id=model.id)}>💾</a>"
+            )
+        return ""
+
     _type = ContractType.standard
     can_delete = False
     column_searchable_list = ("client.first_name", "client.last_name")
@@ -155,11 +162,20 @@ class ContractView(_ContractView):
         "remaining_hours": "Heures restantes",
         "flat_rate_pricing": "Taux horaire",
         "weekly_hours": "Nombre d'heures hebdomadaires",
+        "download_link": "Télécharger",
     }
-    column_list = ["type", "client", "room_type", "start_date", "end_date"]
+    column_list = [
+        "type",
+        "client",
+        "room_type",
+        "start_date",
+        "end_date",
+        "download_link",
+    ]
     column_formatters = {
         "room_type": format_room_type,
         "type": (lambda v, c, m, p: f"{ContractTypeEnum[m.type]._value_}"),
+        "download_link": render_download_link,
     }
     form_excluded_columns = [
         "type",

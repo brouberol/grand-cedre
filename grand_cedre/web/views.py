@@ -6,6 +6,7 @@ from . import app
 from .db import db
 from grand_cedre.models.invoice import Invoice
 from grand_cedre.models.balance import BalanceSheet
+from grand_cedre.models.contract import Contract
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 output_dir = os.path.join(parent_dir, "output")
@@ -41,4 +42,21 @@ def download_balance_sheet_as_csv(balance_id):
     response.headers[
         "Content-Disposition"
     ] = f"attachment; filename={balance_sheet.filename('csv')}"
+    return response
+
+
+@app.route("/contract/<int:contract_id>/odt")
+def download_contract_as_odt(contract_id):
+    contract = db.session.query(Contract).get(contract_id)
+    if not contract:
+        abort(404)
+
+    odt = contract.to_odt(app.jinja_env)
+    response = make_response(odt)
+    response.headers[
+        "Content-type"
+    ] = "application/vnd.oasis.opendocument.text; charset=utf-8"
+    response.headers[
+        "Content-Disposition"
+    ] = f"attachment; filename={contract.filename('odt')}"
     return response
