@@ -79,8 +79,8 @@ def insert_prices_from_file(model, filename):
         for interval, price in pricing_data["prices"].items():
             duration_from, duration_to = interval.split("->")
             if model == RecurringPricing:
-                duration_to = int(Decimal(duration_to) * 60)
-                duration_from = int(Decimal(duration_from) * 60)
+                duration_to = int(Decimal(duration_to) * 60 * 8)
+                duration_from = int(Decimal(duration_from) * 60 * 8)
                 pricing, created = get_or_create(
                     db.session,
                     model,
