@@ -97,7 +97,7 @@ class RoomBooking:
                     logger.info(
                         (
                             "Ignoring event description as the format does "
-                            "not match an email afdress"
+                            "not match an email address"
                         )
                     )
             else:
