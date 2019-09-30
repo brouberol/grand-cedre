@@ -123,7 +123,7 @@ class RoomBooking:
         creator = session.query(Client).filter_by(email=self.creator_email).first()
         if not creator:
             creator = Client(email=self.creator_email)
-            logging.info(f"Adding client {creator} to DB")
+            logger.info(f"Adding client {creator} to DB")
             session.add(creator)
             session.commit()
 
