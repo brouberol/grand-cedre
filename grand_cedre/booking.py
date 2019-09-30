@@ -116,7 +116,7 @@ class RoomBooking:
                 event["end"]["dateTime"], "%Y-%m-%dT%H:%M:%S+%f:00"
             ),
             creator_email=creator_email,
-            title=event["summary"],
+            title=event.get("summary", "No title"),
             individual=individual,
         )
 
