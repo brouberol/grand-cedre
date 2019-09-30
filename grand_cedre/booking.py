@@ -161,9 +161,9 @@ def get_daily_booking_pricing(daily_booking, contract, individual_status, sessio
     else:
         pricing = session.query(pricing_model).filter(
             and_(
-                pricing_model.duration_from < daily_booking.duration_hours,
+                pricing_model.duration_from < daily_booking.duration_hours * 60,
                 or_(
-                    pricing_model.duration_to >= daily_booking.duration_hours,
+                    pricing_model.duration_to >= daily_booking.duration_hours * 60,
                     pricing_model.duration_to.is_(None),
                 ),
                 pricing_model.valid_from <= daily_booking.date,

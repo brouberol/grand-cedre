@@ -406,8 +406,8 @@ class BasePricingView(GrandCedreView):
 class PricingView(BasePricingView):
     def format_duration(view, context, model, p):
         if model.duration_to is None:
-            return f"]{model.duration_from},∞["
-        return f"]{model.duration_from}, {model.duration_to}]"
+            return f"]{model.duration_from / 60.0 },∞["
+        return f"]{model.duration_from / 60.0}, {model.duration_to / 60.0}]"
 
     column_labels = {
         "valid_from": "Date d'instauration",

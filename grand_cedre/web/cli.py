@@ -93,8 +93,8 @@ def insert_prices_from_file(model, filename):
                     duration_to=duration_to,
                 )
             else:
-                duration_to = int(duration_to) if duration_to else None
-                duration_from = int(duration_from)
+                duration_to = int(float(duration_to) * 60) if duration_to else None
+                duration_from = int(float(duration_from) * 60)
                 pricing, created = get_or_create(
                     db.session,
                     model,

@@ -10,9 +10,9 @@ from grand_cedre.models.types import PricingType
 class BasePricing:
     def format_interval(self):
         if self.duration_to:
-            return f"] {self.duration_from}h -> {self.duration_to}h ]"
+            return f"] {self.duration_from / 60.0}h -> {self.duration_to / 60.0}h ]"
         else:
-            return f"] {self.duration_from}h -> + ]"
+            return f"] {self.duration_from / 60.0}h -> + ]"
 
 
 class HourlyPricing(BasePricing):
