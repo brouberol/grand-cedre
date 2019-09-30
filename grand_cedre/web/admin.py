@@ -422,6 +422,11 @@ class PricingView(BasePricingView):
 
 
 class RecurringPricingView(BasePricingView):
+    def format_duration(view, context, model, p):
+        if model.duration_to is None:
+            return f"]{model.duration_from / 8.0 },∞["
+        return f"]{model.duration_from / 8.0}, {model.duration_to / 8.0}]"
+
     column_labels = {
         "valid_from": "Date d'instauration",
         "valid_to": "Date de fin de validité",
@@ -430,7 +435,10 @@ class RecurringPricingView(BasePricingView):
         "duration_to": "Durée maximal (inclue)",
     }
     column_list = ["duration", "monthly_price", "valid_from", "valid_to"]
-    column_formatters = {"duration": (lambda v, c, m, p: f"{m.format_interval()}")}
+    column_formatters = {
+        "duration": (lambda v, c, m, p: f"{m.format_interval()}"),
+        "duration": format_duration,
+    }
     form_excluded_columns = ["type"]
 
 
