@@ -144,6 +144,10 @@ def get_daily_booking_pricing(daily_booking, contract, individual_status, sessio
     """
     Get the pricing that was applicable at the time of the booking
     """
+
+    def to_minutes(duration_str):
+        return int(Decimal(duration_str) * 60)
+
     pricing_model = pricing_by_contract_and_room[(contract.type, individual_status)]
     if pricing_model == FreePricing:
         return pricing_model
@@ -161,9 +165,10 @@ def get_daily_booking_pricing(daily_booking, contract, individual_status, sessio
     else:
         pricing = session.query(pricing_model).filter(
             and_(
-                pricing_model.duration_from < daily_booking.duration_hours * 60,
+                pricing_model.duration_from < to_minutes(daily_booking.duration_hours),
                 or_(
-                    pricing_model.duration_to >= daily_booking.duration_hours * 60,
+                    pricing_model.duration_to
+                    >= to_minutes(daily_booking.duration_hours),
                     pricing_model.duration_to.is_(None),
                 ),
                 pricing_model.valid_from <= daily_booking.date,
