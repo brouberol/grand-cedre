@@ -73,7 +73,7 @@ def generate_invoice_per_contract(
             if i == 0:
                 for folder_name in [
                     invoice.issued_at.year,
-                    format_date(previous_month, "MMMM", locale="fr_FR").capitalize(),
+                    format_date(start, "MMMM", locale="fr_FR").capitalize(),
                 ]:
                     parent_id = ensure_drive_folder(
                         folder_name, parent_id, drive_service
