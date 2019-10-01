@@ -30,6 +30,7 @@ def generate_invoice_per_contract(
     end = end_of_month(year=current_year, month=previous_month).date()
 
     drive_service = get_drive_service()
+
     for i, contract in enumerate(session.query(Contract)):
         if contract.client.is_owner:
             logger.info(
@@ -46,12 +47,15 @@ def generate_invoice_per_contract(
             continue
         elif contract.type == ContractType.exchange:
             logger.info("Skipping exchange contract invoice generation for {contract}")
+            continue
+
         logger.info(f"Generating invoice for {contract} for period {start}->{end}")
         bookings = (
             session.query(DailyBooking)
             .filter(DailyBooking.client_id == contract.client.id)
             .filter(and_(start <= DailyBooking.date, DailyBooking.date <= end))
         ).all()
+
         if not bookings:
             logger.info(f"No bookings for {contract.client} between {start} and {end}")
             continue
