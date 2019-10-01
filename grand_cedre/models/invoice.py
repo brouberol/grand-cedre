@@ -77,7 +77,7 @@ class Invoice(GrandCedreBase):
 
     @property
     def month(self):
-        return int(self.period.split("-")[0])
+        return int(self.period.split("-")[1])
 
     @property
     def is_valid(self):
