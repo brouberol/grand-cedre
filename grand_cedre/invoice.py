@@ -47,6 +47,15 @@ def generate_invoice_per_contract(
         elif contract.type == ContractType.exchange:
             logger.info("Skipping exchange contract invoice generation for {contract}")
         logger.info(f"Generating invoice for {contract} for period {start}->{end}")
+        bookings = (
+            session.query(DailyBooking)
+            .filter(DailyBooking.client_id == contract.client.id)
+            .filter(and_(start <= DailyBooking.date, DailyBooking.date <= end))
+        ).all()
+        if not bookings:
+            logger.info(f"No bookings for {contract.client} between {start} and {end}")
+            continue
+
         invoice, created = get_or_create(
             session,
             Invoice,
@@ -55,11 +64,6 @@ def generate_invoice_per_contract(
             period=Invoice.format_period(date=start),
             currency="EURO",
         )
-        bookings = (
-            session.query(DailyBooking)
-            .filter(DailyBooking.client_id == contract.client.id)
-            .filter(and_(start <= DailyBooking.date, DailyBooking.date <= end))
-        ).all()
         if created:
             for booking in bookings:
                 booking.invoice = invoice
