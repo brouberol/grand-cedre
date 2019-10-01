@@ -38,8 +38,13 @@ def parse_date(date_str):
 @click.option("--month", type=int)
 @click.option("--no-commit", is_flag=True)
 @click.option("--no-upload", is_flag=True)
-def generate_invoices(year, month, no_commit, no_upload):
+@click.option("--pdb", is_flag=True)
+def generate_invoices(year, month, no_commit, no_upload, pdb):
     """Generate invoices for the argument month/year period"""
+    if pdb:
+        import pdb
+
+        pdb.set_trace()
     drive_data = json.load(open(os.path.join(data_dir, "drive.json")))
     parent_id = drive_data["base_folder"]["id"]
     generate_invoice_per_contract(
