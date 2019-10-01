@@ -36,6 +36,7 @@ def generate_invoice_per_contract(
     end = end_of_month(year=current_year, month=previous_month).date()
 
     drive_service = get_drive_service()
+    first_upload_done = False
 
     for i, contract in enumerate(session.query(Contract)):
         if contract.client.is_owner:
@@ -87,7 +88,7 @@ def generate_invoice_per_contract(
             logger.info(f"Invoice {invoice} already was generated")
 
         if upload:
-            if i == 0:
+            if not first_upload_done:
                 for folder_name in [
                     invoice.issued_at.year,
                     format_date(start, "MMMM", locale="fr_FR").capitalize(),
@@ -95,6 +96,7 @@ def generate_invoice_per_contract(
                     parent_id = ensure_drive_folder(
                         folder_name, parent_id, drive_service
                     )
+                first_upload_done = True
             with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
                 f.write(invoice.to_pdf(jinja_env))
             ensure_drive_file(
