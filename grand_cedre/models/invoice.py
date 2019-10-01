@@ -92,11 +92,11 @@ class Invoice(GrandCedreBase):
         )
 
     def to_html(self, jinja_env, locale="fr_FR"):
-        today = datetime.date.today()
+        d = datetime.date(self.year, self.month, 1)
         template_variables = {}
         template_variables["invoice"] = self
-        template_variables["locale_month"] = format_date(today, "MMMM", locale=locale)
-        template_variables["locale_year"] = today.year
+        template_variables["locale_month"] = format_date(d, "MMMM", locale=locale)
+        template_variables["locale_year"] = d.year
         template_variables["locale_issue_date"] = format_date(
             self.issued_at, "dd MMMM YYYY", locale=locale
         )
