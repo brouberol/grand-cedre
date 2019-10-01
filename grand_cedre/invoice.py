@@ -69,6 +69,9 @@ def generate_invoice_per_contract(
             currency="EURO",
         )
         if created:
+            # Hack: if we've created the invoice for the first time, the relationship
+            # can't resolve just yet
+            invoice.contract = contract
             for booking in bookings:
                 booking.invoice = invoice
                 booking.frozen = True
