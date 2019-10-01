@@ -1,6 +1,6 @@
 <div id="service">
   <div id="service_summary">
-    Intitulé: Mise à disposition de locaux équipés pour le mois {% if locale_month.startswith('a') %}d'{% else %}de {% endif %}{{ locale_month }} {{ locale_year }}
+    Intitulé: Mise à disposition de locaux équipés pour le mois {% if locale_month.startswith(('a', 'o')) %}d'{% else %}de {% endif %}{{ locale_month }} {{ locale_year }}
   </div>
 
   <div id="service_details">
