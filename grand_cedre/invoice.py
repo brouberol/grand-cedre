@@ -52,7 +52,7 @@ def generate_invoice_per_contract(
             Invoice,
             defaults={"issued_at": datetime.date.today()},
             contract_id=contract.id,
-            period=Invoice.format_period(),
+            period=Invoice.format_period(date=start),
             currency="EURO",
         )
         bookings = (
