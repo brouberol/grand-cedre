@@ -24,8 +24,14 @@ from grand_cedre.web.log import logger
 def generate_invoice_per_contract(
     session, upload, parent_id, jinja_env, year=None, month=None
 ):
-    current_year = date.today().year
-    previous_month = date.today().month - 1
+    today = date.today()
+    if today.month == 1:
+        current_year = today.year - 1
+        previous_month = 12
+    else:
+        previous_month = today.month - 1
+        current_year = today.year
+
     start = start_of_month(year=current_year, month=previous_month).date()
     end = end_of_month(year=current_year, month=previous_month).date()
 
