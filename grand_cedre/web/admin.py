@@ -311,6 +311,19 @@ class BookingView(GrandCedreView):
         ),
     }
 
+    def on_model_change(self, form, model, is_created):
+        super().on_model_change(form, model, is_created)
+        invoice = (
+            db.session.query(Invoice)
+            .join(Contract, Invoice.contract_id == Contract.id)
+            .filter(Contract.client == model.client)
+            .filter(Invoice.period == Invoice.format_period(model.date))
+            .first()
+        )
+        if invoice:
+            invoice.daily_bookings.append(model)
+            db.session.add(invoice)
+
 
 class InvoiceView(GrandCedreView):
     def render_download_link(view, context, model, p):
