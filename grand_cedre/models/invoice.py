@@ -87,7 +87,7 @@ class Invoice(GrandCedreBase):
 
     @property
     def filename(self):
-        return f"{str(self.contract.client).lower()}-{self.issued_at}.pdf".replace(
+        return f"{str(self.contract.client).lower()}-{self.period}.pdf".replace(
             " ", "-"
         )
 

@@ -28,11 +28,11 @@ class Client(GrandCedreBase):
     def __str__(self):
         if not all((self.first_name, self.last_name)):
             return self.email
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.first_name.strip()} {self.last_name.strip()}"
 
     @property
     def full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.first_name.strip()} {self.last_name.strip()}"
 
     def missing_details(self):
         return not all(
