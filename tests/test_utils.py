@@ -15,10 +15,10 @@ def test_start_of_current_month(m_utcnow):
 
 
 def test_end_of_month():
-    assert end_of_month(2019, 1) == datetime(2019, 1, 31, 0, 0)
+    assert end_of_month(2019, 1) == datetime(2019, 1, 31, 11, 59, 59)
 
 
 @mock.patch("grand_cedre.utils.utcnow")
 def test_end_of_current_month(m_utcnow):
     m_utcnow.return_value = datetime(2019, 3, 17, 12, 3, 18)
-    assert end_of_month() == datetime(2019, 3, 31, 0, 0)
+    assert end_of_month() == datetime(2019, 3, 31, 11, 59, 59)

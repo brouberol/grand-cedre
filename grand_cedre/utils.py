@@ -33,7 +33,7 @@ def end_of_month(year=None, month=None):
     else:
         day = utcnow()
     _, last_day = calendar.monthrange(day.year, day.month)
-    monthend = day.replace(day=last_day, hour=0, minute=0, second=0)
+    monthend = day.replace(day=last_day, hour=11, minute=59, second=59)
     return monthend
 
 
