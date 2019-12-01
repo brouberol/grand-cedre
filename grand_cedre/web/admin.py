@@ -515,6 +515,7 @@ class BalanceSheetView(GrandCedreView):
         )
 
     column_list = ["start_date", "end_date", "download_link"]
+    column_default_sort = ("start_date", True)
     column_labels = {
         "start_date": "Date de début",
         "end_date": "Date de fin",
@@ -578,7 +579,7 @@ admin.add_view(
 admin.add_view(BookingView(DailyBooking, db.session, "Réservations"))
 admin.add_view(InvoiceView(Invoice, db.session, "Factures"))
 admin.add_view(ExpenseModel(Expense, db.session, "Dépenses"))
-admin.add_view(BalanceSheetView(BalanceSheet, db.session, "Bilans"))
+admin.add_view(BalanceSheetView(BalanceSheet, db.session, "Bilans Financiers"))
 admin.add_view(RoomView(Room, db.session, "Salles"))
 admin.add_view(
     PricingView(
