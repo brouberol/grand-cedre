@@ -23,6 +23,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -r /var/lib/apt/lists
 COPY ./requirements.txt .
+LABEL "com.datadoghq.ad.logs"='[{"source": "python", "service": "grand-cedre"}]'
 RUN pip install -r requirements.txt
 COPY . .
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "--log-config", "gunicorn-logging.conf", "app:app"]
