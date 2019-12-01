@@ -63,7 +63,7 @@ class Invoice(GrandCedreBase):
                 )
         elif self.contract.type == ContractType.recurring:
             if self.contract.recurring_pricing is not None:
-                return self.contract.recurring_pricing.monthly_price
+                return Decimal(self.contract.recurring_pricing.monthly_price)
         return sum([Decimal(booking.price) for booking in self.daily_bookings])
 
     @property
