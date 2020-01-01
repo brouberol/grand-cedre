@@ -41,7 +41,7 @@ def generate_invoice_per_contract(
     for i, contract in enumerate(session.query(Contract)):
         if contract.client.is_owner:
             logger.info(
-                "Skipping invoice generation for {contract} as client is the owner"
+                f"Skipping invoice generation for {contract} as client is the owner"
             )
             continue
         elif contract.client.missing_details():
@@ -53,7 +53,7 @@ def generate_invoice_per_contract(
             )
             continue
         elif contract.type == ContractType.exchange:
-            logger.info("Skipping exchange contract invoice generation for {contract}")
+            logger.info(f"Skipping exchange contract invoice generation for {contract}")
             continue
 
         logger.info(f"Generating invoice for {contract} for period {start}->{end}")
@@ -100,7 +100,7 @@ def generate_invoice_per_contract(
             ensure_drive_file(
                 local_filename=f.name,
                 remote_filename=invoice.filename,
-                description=f"Facture - {invoice.contract.client.full_name}",
+                description=f"Facture - {invoice.contract.client.full_name.replace(',', ' ')}",
                 mimetype="application/pdf",
                 parent_id=parent_id,
                 drive_service=drive_service,
