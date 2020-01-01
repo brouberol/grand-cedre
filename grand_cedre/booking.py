@@ -252,8 +252,19 @@ def import_monthly_bookings(calendars, session, year=None, month=None):
         lambda: defaultdict(lambda: defaultdict(list))
     )
     service = get_calendar_service()
+
+    if not all((year, month)):
+        today = datetime.date.today()
+        if today.month == 1:
+            year = today.year - 1
+            month = 12
+        else:
+            month = today.month - 1
+            year = today.year
+
     start = start_of_month(year, month).isoformat() + "Z"
     end = end_of_month(year, month).isoformat() + "Z"
+
     for calendar in calendars:
         resp = (
             service.events()
