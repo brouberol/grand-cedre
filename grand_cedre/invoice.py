@@ -88,7 +88,7 @@ def generate_invoice_per_contract(
         if upload:
             if not first_upload_done:
                 for folder_name in [
-                    invoice.issued_at.year,
+                    current_year,
                     format_date(start, "MMMM", locale="fr_FR").capitalize(),
                 ]:
                     parent_id = ensure_drive_folder(
