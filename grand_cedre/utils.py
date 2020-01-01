@@ -79,6 +79,7 @@ def ensure_drive_file(
 ):
     """Upload a file the to argument parent Drive id, and overrite if it already exists."""
     media_body = googleapiclient.http.MediaFileUpload(local_filename, mimetype=mimetype)
+    remote_filename = remote_filename.replace("'", "\\'")
     preexisting_file = (
         drive_service.files()
         .list(
