@@ -89,7 +89,7 @@ class Invoice(GrandCedreBase):
     def filename(self):
         return f"{str(self.contract.client).lower()}-{self.period}.pdf".replace(
             " ", "-"
-        )
+        ).replace(",", " ")
 
     def to_html(self, jinja_env, locale="fr_FR"):
         d = datetime.date(self.year, self.month, 1)
