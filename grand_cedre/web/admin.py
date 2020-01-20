@@ -223,7 +223,6 @@ class RecurringContractView(ContractView):
     form_excluded_columns = [
         "type",
         "invoices",
-        "end_date",
         "flat_rate_pricing",
         "recurring_pricing",
         "total_hours",
@@ -256,7 +255,6 @@ class FlatRateContractView(ContractView):
         "client",
         "room_type",
         "start_date",
-        "end_date",
         "flat_rate_pricing",
         "total_hours",
         "remaining_hours",
