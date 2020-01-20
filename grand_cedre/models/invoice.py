@@ -69,7 +69,7 @@ class Invoice(GrandCedreBase):
     @property
     def number(self):
         shortened_year = self.period.split("-")[0][2:]
-        return f"GC {str(self.id).zfill(3)}-{shortened_year}-A"
+        return f"GC {str(self.id).zfill(3)}-{shortened_year}"
 
     @property
     def year(self):
