@@ -184,7 +184,6 @@ class ContractView(_ContractView):
         "remaining_hours",
         "flat_rate_pricing",
         "recurring_pricing",
-        "end_date",
         "weekly_hours",
     ]
     form_args = {
