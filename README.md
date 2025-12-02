@@ -1,3 +1,6 @@
+> [!WARNING]  
+> Moved to https://git.balthazar-rouberol.com/brouberol/grand-cedre
+
 This project implements tools used in the administration of [Le Grand Cèdre](https://sophrologie-chalon.com/le-grand-cedre/), a flexible working space welcoming alternative medicine practitioners, in the form of a web interface.
 
 It allows to register clients base, import booking information from Google Calendars, define pricings, edit contracts, track expenses, generate invoices, monthly, quarterly and yearly balance sheets, upload documents to Google Drive, etc.
